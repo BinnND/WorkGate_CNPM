@@ -1,0 +1,82 @@
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+public class AccountController : Controller
+{
+    private readonly AppDbContext _context;
+
+    public AccountController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public IActionResult Register() => View();
+
+    [HttpPost]
+    public IActionResult Register(string FullName, string Email, string Password, string Role)
+    {
+        if (_context.Users.Any(u => u.Email == Email))
+        {
+            ViewBag.Error = "Email này đã được sử dụng!";
+            return View();
+        }
+
+        string vaiTro = Role == "Student" ? "sinhvien" : "doanhnghiep";
+
+        var newUser = new User
+        {
+            Id = Guid.NewGuid().ToString(), 
+            Email = Email,
+            Password = Password,
+            Role = vaiTro,
+            Status = "Chờ duyệt"
+        };
+
+        _context.Users.Add(newUser);
+        _context.SaveChanges();
+
+        if (vaiTro == "sinhvien")
+        {
+            _context.Users.Add(new User { Id = newUser.Id });
+        }
+        else
+        {
+            _context.Users.Add(new User { Id = newUser.Id });
+        }
+
+        _context.SaveChanges();
+
+        TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+        return RedirectToAction("Login");
+    }
+
+    public IActionResult Login() => View();
+
+    [HttpPost]
+    public async Task<IActionResult> Login(string email, string password)
+    {
+        var user = _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
+
+        if (user != null)
+        {
+            var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), 
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
+        };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        ViewBag.Error = "Tài khoản hoặc mật khẩu không chính xác!";
+        return View();
+    }
+}

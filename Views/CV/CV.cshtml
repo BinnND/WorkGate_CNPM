@@ -1,0 +1,38 @@
+@using SourceCode.Models
+@model IEnumerable<SourceCode.Models.CV>
+
+@{
+    ViewData["Title"] = "Hồ sơ của tôi";
+}
+
+<div class="container mt-4">
+    <h2>Quản lý CV của tôi</h2>
+
+    @foreach (var item in Model)
+    {
+        <div class="alert alert-info">
+            Bạn đã có CV tạo ngày: @item.CreatedAt.ToString("dd/MM/yyyy")
+        </div>
+    }
+
+    <hr />
+
+    <div class="card p-4 shadow-sm">
+        <h5>Tạo CV mới</h5>
+        <form asp-controller="CV" asp-action="Create" method="post">
+            <div class="mb-3">
+                <label>Học vấn</label>
+                <textarea name="Education" class="form-control"></textarea>
+            </div>
+            <div class="mb-3">
+                <label>Kỹ năng</label>
+                <textarea name="Skills" class="form-control"></textarea>
+            </div>
+            <div class="mb-3">
+                <label>Kinh nghiệm</label>
+                <textarea name="Experience" class="form-control"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Lưu Hồ Sơ</button>
+        </form>
+    </div>
+</div>

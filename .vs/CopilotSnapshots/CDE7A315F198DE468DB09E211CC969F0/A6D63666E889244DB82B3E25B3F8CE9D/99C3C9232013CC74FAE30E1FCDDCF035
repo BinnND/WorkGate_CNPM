@@ -1,0 +1,30 @@
+﻿using Microsoft.AspNetCore.Mvc;
+
+public class ApplicationController : Controller
+{
+    private readonly AppDbContext _context;
+
+    public ApplicationController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public IActionResult Apply(int jobId, int cvId)
+    {
+        var userId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+        var app = new Application
+        {
+            JobId = jobId,
+            CVId = cvId,
+            UserId = userId,
+            Status = "Pending",
+            ApplyDate = DateTime.Now
+        };
+
+        _context.Applications.Add(app);
+        _context.SaveChanges();
+
+        return RedirectToAction("Index", "Job");
+    }
+}

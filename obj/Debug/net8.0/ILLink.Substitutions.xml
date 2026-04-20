@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<linker>
+  <assembly fullname="CNPM">
+    <resource name="FSharpSignatureData.CNPM" action="remove"></resource>
+    <resource name="FSharpSignatureCompressedData.CNPM" action="remove"></resource>
+    <resource name="FSharpSignatureDataB.CNPM" action="remove"></resource>
+    <resource name="FSharpSignatureCompressedDataB.CNPM" action="remove"></resource>
+    <resource name="FSharpOptimizationData.CNPM" action="remove"></resource>
+    <resource name="FSharpOptimizationCompressedData.CNPM" action="remove"></resource>
+    <resource name="FSharpOptimizationDataB.CNPM" action="remove"></resource>
+    <resource name="FSharpOptimizationCompressedDataB.CNPM" action="remove"></resource>
+    <resource name="FSharpOptimizationInfo.CNPM" action="remove"></resource>
+    <resource name="FSharpSignatureInfo.CNPM" action="remove"></resource>
+  </assembly>
+</linker>

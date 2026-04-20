@@ -1,0 +1,129 @@
+﻿@using SourceCode.Models
+@model IEnumerable<SourceCode.Models.Job>
+
+@{
+    ViewData["Title"] = "Trang Chủ - Sinh Viên";
+    Layout = null; 
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WorkGate</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-custom { background-color: white; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem; height: 60px; }
+        .navbar-brand-text { color: #2c5282; font-weight: 700; font-size: 22px; margin-right: 30px; }
+        .nav-tabs-custom { display: flex; list-style: none; padding: 0; margin: 0; height: 100%; }
+        .nav-tabs-custom li { margin-right: 20px; }
+        .nav-tabs-custom a { color: #4a5568; text-decoration: none; font-weight: 600; display: flex; align-items: center; height: 100%; padding: 0 5px; border-bottom: 3px solid transparent; }
+        .nav-tabs-custom a.active { color: #3182ce; border-bottom-color: #3182ce; }
+        .avatar-circle { width: 32px; height: 32px; background-color: #cbd5e0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: #2c5282; }
+        .sidebar-menu { list-style: none; padding: 0; }
+        .job-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
+        .job-title { font-size: 18px; font-weight: 700; color: #2d3748; margin-bottom: 8px; }
+        .btn-apply { background-color: #3182ce; color: white; font-weight: 600; border: none; padding: 8px 24px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar-custom d-flex align-items-center justify-content-between mb-4 shadow-sm">
+        <div class="d-flex align-items-center h-100">
+            <i class="fas fa-bars text-secondary me-3" style="font-size: 20px; cursor:pointer;"></i>
+            <div class="navbar-brand-text">WorkGate</div>
+            
+            <ul class="nav-tabs-custom">
+                <li><a asp-controller="Home" asp-action="SinhVien" class="active">Tìm Việc</a></li>
+                <li><a asp-controller="CV" asp-action="Index">Hồ Sơ</a></li>
+            </ul>
+        </div>
+
+        <div class="dropdown">
+            <div class="d-flex align-items-center" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                <div class="avatar-circle me-2 text-uppercase">
+                    @(User.Identity.Name?.Substring(0, 1) ?? "U")
+                </div>
+                <span class="fw-semibold text-dark">@User.Identity.Name</span>
+                <i class="fas fa-chevron-down ms-2 text-secondary" style="font-size: 12px;"></i>
+            </div>
+    
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="userDropdown">
+                <li class="px-3 py-2 border-bottom">
+                    <div class="small text-muted">Tài khoản sinh viên</div>
+                    <div class="fw-bold text-primary">@User.Identity.Name</div>
+                </li>
+                <li>
+                    <a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile">
+                        <i class="fas fa-user-circle me-2 text-secondary"></i> Thông tin cá nhân
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item py-2 text-danger" asp-controller="Account" asp-action="Logout">
+                        <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="container-fluid px-4">
+        <div class="row">
+            <div class="col-md-3 col-lg-2">
+                <ul class="sidebar-menu">
+                    <li> <a asp-controller="CV" asp-action="Index" class="btn btn-primary w-100 text-white">
+                            <i class="fas fa-file-alt me-2"></i>CV Online
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-md-9 col-lg-10">
+                <form method="get" asp-controller="Home" asp-action="SinhVien" class="input-group search-box shadow-sm mb-4">
+                    <input type="text" name="searchString" value="@ViewBag.SearchString" class="form-control border-end-0" placeholder="Tìm kiếm công việc (Tên cty, vị trí)...">
+                    <button class="btn btn-white border border-start-0 text-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var job in Model)
+                    {
+                        <div class="job-card shadow-sm border-0">
+                            <div>
+                                <div class="job-title">@job.Title</div>
+                                <div class="job-info"><i class="fas fa-building me-2 text-primary"></i>@job.Company?.FullName</div>
+                                <div class="job-info text-secondary"><i class="fas fa-map-marker-alt me-2"></i>@job.Location</div>
+                                <div class="text-muted small mt-2">
+                                    <i class="far fa-calendar-alt me-1"></i> Hạn nộp: @job.Deadline.ToString("dd/MM/yyyy")
+                                </div>
+                            </div>
+                            <div>
+                                <form asp-controller="Application" asp-action="Apply" method="post">
+                                    <input type="hidden" name="jobId" value="@job.Id" />
+                                    <button type="submit" class="btn btn-apply shadow-sm">Ứng Tuyển</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 100px; opacity: 0.5" />
+                        <p class="text-muted mt-3">Không tìm thấy công việc nào phù hợp.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
