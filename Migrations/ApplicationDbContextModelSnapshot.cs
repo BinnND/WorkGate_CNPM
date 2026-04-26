@@ -22,196 +22,322 @@ namespace SourceCode.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SourceCode.Models.Application", b =>
+            modelBuilder.Entity("SourceCode.Models.BaoCao", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("PK_sMaBaoCao")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("ApplyDate")
+                    b.Property<DateTime>("dNgayLap")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CVId")
+                    b.Property<double>("fTiLeCoViec")
+                        .HasColumnType("float");
+
+                    b.Property<int>("iSoSVCoViec")
                         .HasColumnType("int");
 
-                    b.Property<int>("JobId")
+                    b.Property<int>("iTongHoSo")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
+                    b.Property<int>("iTongTin")
+                        .HasColumnType("int");
+
+                    b.Property<string>("sFileBC")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("sLoaiBC")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("sNguoiLap")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("JobId");
+                    b.Property<string>("sTenBC")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("UserId");
+                    b.HasKey("PK_sMaBaoCao");
 
-                    b.ToTable("Applications");
+                    b.ToTable("tblBaoCao", (string)null);
                 });
 
-            modelBuilder.Entity("SourceCode.Models.CV", b =>
+            modelBuilder.Entity("SourceCode.Models.DNHopTac", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("PK_sMaSoThue")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Education")
+                    b.Property<string>("sLinhVucKD")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Experience")
+                    b.Property<string>("sTenDN")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Skills")
+                    b.Property<string>("sTrangThaiHT")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.HasKey("PK_sMaSoThue");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CVs");
+                    b.ToTable("tblDNHopTac", (string)null);
                 });
 
-            modelBuilder.Entity("SourceCode.Models.Job", b =>
+            modelBuilder.Entity("SourceCode.Models.Doanhnghiep", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("PK_sMaDN")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("FK_sMaSoThue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
+                    b.Property<string>("FK_sUserID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("Deadline")
+                    b.Property<DateTime?>("dNgayKichHoat")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("sDiaChi")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Location")
+                    b.Property<string>("sGiayPhepKD")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("PostedDate")
+                    b.Property<string>("sNguoiDaiDien")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sTenDN")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sTrangThaiDuyet")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PK_sMaDN");
+
+                    b.ToTable("tblDoanhNghiep", (string)null);
+                });
+
+            modelBuilder.Entity("SourceCode.Models.HoSoSinhVien", b =>
+                {
+                    b.Property<string>("PK_sMaHoSo")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FK_sMaSV")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("dNgayTao")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Requirements")
+                    b.Property<string>("sFileCV")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Salary")
+                    b.Property<string>("sKyNang")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
+                    b.Property<string>("sTrangThaiHoSo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("sTrinhDoHocVan")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("tKinhNghiem")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("CompanyId");
+                    b.Property<string>("tThongTinKhac")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("Jobs");
+                    b.HasKey("PK_sMaHoSo");
+
+                    b.ToTable("tblHoSoSinhVien", (string)null);
+                });
+
+            modelBuilder.Entity("SourceCode.Models.SinhVien", b =>
+                {
+                    b.Property<string>("PK_sMaSV")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FK_sUserID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sHoTen")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sKhoaHoc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sLop")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sNganhHoc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sSDT")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sTinhTrangViecLam")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PK_sMaSV");
+
+                    b.ToTable("tblSinhVien", (string)null);
+                });
+
+            modelBuilder.Entity("SourceCode.Models.TinTuyenDung", b =>
+                {
+                    b.Property<string>("PK_sMaTin")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FK_sMaDN")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("dHanNop")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("dNgayDang")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("fMucLuong")
+                        .HasColumnType("float");
+
+                    b.Property<int>("iSoLuong")
+                        .HasColumnType("int");
+
+                    b.Property<string>("sDiaDiem")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sGhiChuTuChoi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sTrangThaiTin")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sViTriCV")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sYeuCauChuyenMon")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("tMoTaCV")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PK_sMaTin");
+
+                    b.ToTable("tblTinTuyenDung", (string)null);
+                });
+
+            modelBuilder.Entity("SourceCode.Models.UngTuyen", b =>
+                {
+                    b.Property<string>("PK_sMaUngTuyen")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FK_sMaHoSo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FK_sMaTin")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("dNgayUngTuyen")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("sTrangThaiUngTuyen")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PK_sMaUngTuyen");
+
+                    b.HasIndex("FK_sMaHoSo");
+
+                    b.HasIndex("FK_sMaTin");
+
+                    b.ToTable("tblUngTuyen", (string)null);
                 });
 
             modelBuilder.Entity("SourceCode.Models.User", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("PK_sUserID")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("dNgayTao")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("sEmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FullName")
+                    b.Property<string>("sHoten")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("sMatKhau")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Phone")
+                    b.Property<string>("sSDT")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
+                    b.Property<string>("sTrangThaiTK")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
+                    b.Property<string>("sVaiTro")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("PK_sUserID");
 
-                    b.ToTable("Users");
+                    b.ToTable("tblUser", (string)null);
                 });
 
-            modelBuilder.Entity("SourceCode.Models.Application", b =>
+            modelBuilder.Entity("SourceCode.Models.UngTuyen", b =>
                 {
-                    b.HasOne("SourceCode.Models.Job", "Job")
+                    b.HasOne("SourceCode.Models.HoSoSinhVien", "HoSoSinhVien")
                         .WithMany()
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SourceCode.Models.User", "Student")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Job");
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("SourceCode.Models.CV", b =>
-                {
-                    b.HasOne("SourceCode.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("FK_sMaHoSo")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SourceCode.Models.Job", b =>
-                {
-                    b.HasOne("SourceCode.Models.User", "Company")
+                    b.HasOne("SourceCode.Models.TinTuyenDung", "TinTuyenDung")
                         .WithMany()
-                        .HasForeignKey("CompanyId")
+                        .HasForeignKey("FK_sMaTin")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Company");
+                    b.Navigation("HoSoSinhVien");
+
+                    b.Navigation("TinTuyenDung");
                 });
 #pragma warning restore 612, 618
         }

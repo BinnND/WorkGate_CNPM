@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // Thêm để dùng các hàm Async
+using Microsoft.EntityFrameworkCore; 
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using SourceCode.Data; // Thay bằng namespace thực tế của bạn
-using SourceCode.Models; // Thay bằng namespace thực tế của bạn
+using SourceCode.Data; 
+using SourceCode.Models; 
 
 public class AccountController : Controller
 {
@@ -29,47 +29,35 @@ public class AccountController : Controller
     [Authorize]
     public async Task<IActionResult> Profile()
     {
-        // Sử dụng User.FindFirstValue để lấy ID
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdString)) return RedirectToAction("Login");
 
-        if (string.IsNullOrEmpty(userIdString))
-        {
-            return RedirectToAction("Login");
-        }
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.PK_sUserID == userIdString);
 
-        int userId = int.Parse(userIdString);
-
-        // Tìm user trong Database để lấy dữ liệu mới nhất
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
+        if (user == null) return NotFound();
         return View(user);
     }
 
     [HttpPost]
     public IActionResult Register(string FullName, string Email, string Password, string Role)
     {
-        if (_context.Users.Any(u => u.Email == Email))
+        if (_context.Users.Any(u => u.sEmail == Email))
         {
             ViewBag.Error = "Email này đã được sử dụng!";
             return View();
         }
 
-        // Chuyển đổi Role từ giao diện sang Role trong DB
         string vaiTro = Role == "Student" ? "sinhvien" : "doanhnghiep";
-
+        string newId = "USR" + Guid.NewGuid().ToString().Substring(0, 8);
         var newUser = new User
         {
-            FullName = FullName,
-            Email = Email,
-            Password = HashPassword(Password),
-            Role = vaiTro,
-            Status = "Chờ duyệt",
-            Phone = ""
+            PK_sUserID = newId,
+            sHoten = FullName,
+            sEmail = Email,
+            sMatKhau = HashPassword(Password),
+            sVaiTro = vaiTro,
+            sTrangThaiTK = "Chờ duyệt",
+            sSDT = ""
         };
 
         _context.Users.Add(newUser);
@@ -84,17 +72,16 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(string email, string password)
     {
-        var user = _context.Users.FirstOrDefault(u => u.Email == email);
+        var user = _context.Users.FirstOrDefault(u => u.sEmail == email);
 
-        if (user != null && VerifyPassword(password, user.Password))
+        if (user != null && VerifyPassword(password, user.sMatKhau))
         {
-            // Quan trọng: Lưu ID vào NameIdentifier để hàm Profile lấy được
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.FullName), // Lưu tên để hiển thị cạnh chữ NA
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.NameIdentifier, user.PK_sUserID.ToString()),
+                new Claim(ClaimTypes.Name, user.sHoten), 
+                new Claim(ClaimTypes.Email, user.sEmail),
+                new Claim(ClaimTypes.Role, user.sVaiTro)
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -102,12 +89,11 @@ public class AccountController : Controller
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            // Điều hướng dựa trên Role
-            if (user.Role == "sinhvien")
+            if (user.sVaiTro == "sinhvien")
             {
                 return RedirectToAction("SinhVien", "Home");
             }
-            else if (user.Role == "doanhnghiep")
+            else if (user.sVaiTro == "doanhnghiep")
             {
                 return RedirectToAction("Enterprise", "Home");
             }

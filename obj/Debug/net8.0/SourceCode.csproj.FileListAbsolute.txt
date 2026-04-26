@@ -133,13 +133,9 @@ D:\CNPM\SourceCode\obj\Debug\net8.0\SourceCode.MvcApplicationPartsAssemblyInfo.c
 D:\CNPM\SourceCode\obj\Debug\net8.0\SourceCode.MvcApplicationPartsAssemblyInfo.cache
 D:\CNPM\SourceCode\obj\Debug\net8.0\SourceCode.RazorAssemblyInfo.cache
 D:\CNPM\SourceCode\obj\Debug\net8.0\SourceCode.RazorAssemblyInfo.cs
+D:\CNPM\SourceCode\obj\Debug\net8.0\SourceCode.sourcelink.json
 D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets.build.json
 D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets.development.json
-D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets\msbuild.SourceCode.Microsoft.AspNetCore.StaticWebAssets.props
-D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets\msbuild.build.SourceCode.props
-D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.SourceCode.props
-D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.SourceCode.props
-D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets.pack.json
 D:\CNPM\SourceCode\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 D:\CNPM\SourceCode\obj\Debug\net8.0\scopedcss\bundle\SourceCode.styles.css
 D:\CNPM\SourceCode\obj\Debug\net8.0\scopedcss\projectbundle\SourceCode.bundle.scp.css
@@ -149,3 +145,12 @@ D:\CNPM\SourceCode\obj\Debug\net8.0\refint\SourceCode.dll
 D:\CNPM\SourceCode\obj\Debug\net8.0\SourceCode.pdb
 D:\CNPM\SourceCode\obj\Debug\net8.0\SourceCode.genruntimeconfig.cache
 D:\CNPM\SourceCode\obj\Debug\net8.0\ref\SourceCode.dll
+D:\CNPM\SourceCode\bin\Debug\net8.0\SourceCode.staticwebassets.endpoints.json
+D:\CNPM\SourceCode\obj\Debug\net8.0\rpswa.dswa.cache.json
+D:\CNPM\SourceCode\obj\Debug\net8.0\rjimswa.dswa.cache.json
+D:\CNPM\SourceCode\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+D:\CNPM\SourceCode\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets.build.json.cache
+D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+D:\CNPM\SourceCode\obj\Debug\net8.0\swae.build.ex.cache
+D:\CNPM\SourceCode\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

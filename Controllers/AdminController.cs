@@ -13,8 +13,8 @@ public class AdminController : Controller
     public IActionResult Index()
     {
         ViewBag.Users = _context.Users.Count();
-        ViewBag.Jobs = _context.Jobs.Count();
-        ViewBag.Applications = _context.Applications.Count();
+        ViewBag.Jobs = _context.TinTuyenDungs.Count();
+        ViewBag.Applications = _context.UngTuyens.Count();
 
         return View();
     }
@@ -27,7 +27,7 @@ public class AdminController : Controller
     public IActionResult ApproveCompany(int id)
     {
         var user = _context.Users.Find(id);
-        user.Status = "Approved";
+        user.sTrangThaiTK = "Approved";
         _context.SaveChanges();
 
         return RedirectToAction("Users");
@@ -35,13 +35,13 @@ public class AdminController : Controller
 
     public IActionResult JobsPending()
     {
-        return View(_context.Jobs.Where(j => j.Status == "Pending").ToList());
+        return View(_context.TinTuyenDungs.Where(j => j.sTrangThaiTin == "Pending").ToList());
     }
 
     public IActionResult ApproveJob(int id)
     {
-        var job = _context.Jobs.Find(id);
-        job.Status = "Approved";
+        var job = _context.TinTuyenDungs.Find(id);
+        job.sTrangThaiTin = "Approved";
         _context.SaveChanges();
 
         return RedirectToAction("JobsPending");

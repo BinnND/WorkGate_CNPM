@@ -1,10 +1,9 @@
-﻿@model IEnumerable<SourceCode.Models.Application>
+﻿@model IEnumerable<SourceCode.Models.UngTuyen>
 
 @{
     ViewData["Title"] = "Danh Sách Ứng Viên - Doanh Nghiệp";
     Layout = null; 
 }
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -17,7 +16,7 @@
     <style>
         body { background-color: #fff; font-family: 'Segoe UI', sans-serif; color: #2d3748; }
         .navbar-custom { background-color: #f8f9fa; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem; height: 60px; }
-        .navbar-brand-text { color: #2c5282; font-weight: 700; font-size: 22px; }
+        .navbar-brand-text { color: #2c5282; font-weight: 700; font-size: 22px; text-decoration: none; }
         .sidebar { background-color: #f8f9fa; border-right: 1px solid #e2e8f0; min-height: calc(100vh - 60px); padding: 0; }
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-cta { display: block; padding: 15px 20px; background-color: #3182ce; color: white; font-weight: 600; text-decoration: none; }
@@ -32,6 +31,7 @@
         .btn-approve { background-color: #48bb78; color: white; }
         .btn-reject { background-color: #e53e3e; color: white; }
         .status-badge { font-size: 12px; padding: 4px 8px; border-radius: 12px; font-weight: 600; }
+        .avatar-circle { width: 32px; height: 32px; background-color: #cbd5e0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: #2c5282; }
     </style>
 </head>
 <body>
@@ -39,59 +39,85 @@
     <header class="navbar-custom d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
             <i class="fas fa-bars text-secondary me-3" style="font-size: 20px; cursor:pointer;"></i>
-            <div class="navbar-brand-text">WorkGate</div>
+            @* Sửa lỗi: Thêm link điều hướng cho Logo để tránh 404 *@
+            <a asp-controller="Home" asp-action="Enterprise" class="text-decoration-none">
+                <div class="navbar-brand-text">WorkGate</div>
+            </a>
         </div>
-        <div class="user-profile d-flex align-items-center" style="cursor: pointer;">
-            <div class="avatar-circle me-2">@(User.Identity.Name?.Substring(0,1).ToUpper())</div>
-            <span class="fw-semibold text-dark">@User.Identity.Name</span>
-            <i class="fas fa-chevron-down ms-2 text-secondary" style="font-size: 12px;"></i>
+        
+        <div class="dropdown">
+            <div class="user-profile d-flex align-items-center" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                <div class="avatar-circle me-2">@(User.Identity.Name?.Substring(0,1).ToUpper())</div>
+                <span class="fw-semibold text-dark">@User.Identity.Name</span>
+                <i class="fas fa-chevron-down ms-2 text-secondary" style="font-size: 12px;"></i>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                <li>
+                    @* Link đến Profile dành cho Doanh nghiệp *@
+                    <a class="dropdown-item py-2" asp-controller="Job" asp-action="Profile">
+                        <i class="fas fa-user-circle me-2"></i>Thông tin cá nhân
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item py-2 text-danger" asp-controller="Account" asp-action="Logout">
+                        <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                    </a>
+                </li>
+            </ul>
         </div>
     </header>
 
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-3 col-lg-2 sidebar">
-    <ul class="sidebar-menu">
-        <li>
-            @* Trỏ về JobController, Action Create *@
-            <a asp-controller="Job" asp-action="Create" class="sidebar-cta">
-                <i class="fas fa-plus me-2"></i> Đăng Tin Tuyển Dụng
-            </a>
-        </li>
-        <li>
-            @* Trỏ về JobController, Action Index (hoặc danh sách bài đăng của doanh nghiệp) *@
-            <a asp-controller="Job" asp-action="Index" class="sidebar-link">
-                Quản Lý Tuyển Dụng
-            </a>
-        </li>
-        <li>
-            @* Đây là trang hiện tại bạn đang đứng *@
-            <a asp-controller="Home" asp-action="Enterprise" class="sidebar-link active">
-                Danh Sách Ứng Viên
-            </a>
-        </li>
-        <li>
-            @* Thống kê - Bạn có thể tạo thêm Action Statistics sau *@
-            <a asp-controller="Home" asp-action="Statistics" class="sidebar-link">
-                Báo Cáo Thống Kê
-            </a>
-        </li>
-        <li>
-            @* Cài đặt hệ thống *@
-            <a href="#" class="sidebar-link">Cài Đặt Hệ Thống</a>
-        </li>
-    </ul>
-</div>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a asp-controller="Job" asp-action="Create" class="sidebar-cta">
+                            <i class="fas fa-plus me-2"></i> Đăng Tin Tuyển Dụng
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Job" asp-action="Index" class="sidebar-link">
+                            <i class="fas fa-tasks me-2"></i> Quản Lý Tuyển Dụng
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Home" asp-action="Enterprise" class="sidebar-link active">
+                            <i class="fas fa-users me-2"></i> Danh Sách Ứng Viên
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Home" asp-action="Statistics" class="sidebar-link">
+                            <i class="fas fa-chart-bar me-2"></i> Báo Cáo Thống Kê
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
             <div class="col-md-9 col-lg-10 content-area">
-                <div class="page-title">Danh sách ứng viên</div>
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert" style="background-color: #f0fff4; color: #276749; border-left: 5px solid #48bb78 !important;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle me-3" style="font-size: 24px;"></i>
+                            <div>
+                                <strong class="d-block">Thành công!</strong>
+                                <span>@TempData["SuccessMessage"]</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
 
-                <form method="get" class="input-group mb-4">
-                    <input type="text" name="search" class="form-control shadow-none" placeholder="Tìm kiếm ứng viên...">
-                    <button class="btn btn-outline-secondary border-start-0" type="submit"><i class="fas fa-search text-primary"></i></button>
+                <div class="page-title">Danh sách ứng viên ứng tuyển</div>
+
+                <form method="get" class="input-group mb-4 shadow-sm border rounded">
+                    <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="Tìm kiếm ứng viên theo tên hoặc vị trí...">
+                    <button class="btn btn-white border-0" type="submit"><i class="fas fa-search text-primary"></i></button>
                 </form>
 
-                <div class="table-responsive">
+                <div class="table-responsive bg-white rounded shadow-sm p-3">
                     <table class="table table-custom">
                         <thead>
                             <tr>
@@ -107,23 +133,23 @@
                                 foreach (var app in Model)
                                 {
                                     <tr>
-                                        <td class="fw-bold">@app.Student?.FullName</td>
-                                        <td>@app.Job?.Title</td>
+                                        <td class="fw-bold">@app.FK_sMaHoSo</td>
+                                        <td>@app.FK_sMaTin</td>
                                         <td>
-                                            @if (app.Status == "Approved") { <span class="status-badge bg-success text-white">Đã Duyệt</span> }
-                                            else if (app.Status == "Rejected") { <span class="status-badge bg-danger text-white">Từ Chối</span> }
+                                            @if (app.sTrangThaiUngTuyen == "Approved") { <span class="status-badge bg-success text-white">Đã Duyệt</span> }
+                                            else if (app.sTrangThaiUngTuyen == "Rejected") { <span class="status-badge bg-danger text-white">Từ Chối</span> }
                                             else { <span class="status-badge bg-warning text-dark">Chờ Duyệt</span> }
                                         </td>
                                         <td>
                                             <div class="d-flex gap-2">
-                                                <a href="/CV/Details/@app.UserId" class="btn btn-action btn-view">Xem CV</a>
+                                                <a href="/CV/Details/@app.FK_sMaHoSo" class="btn btn-action btn-view">Xem CV</a>
                                                 
-                                                @if (app.Status == "Pending")
+                                                @if (app.sTrangThaiUngTuyen == "Pending")
                                                 {
-                                                    <form asp-action="Approve" asp-route-id="@app.Id" method="post" class="d-inline">
+                                                    <form asp-action="Approve" asp-route-id="@app.PK_sMaUngTuyen" method="post" class="d-inline">
                                                         <button type="submit" class="btn btn-action btn-approve">Duyệt</button>
                                                     </form>
-                                                    <form asp-action="Reject" asp-route-id="@app.Id" method="post" class="d-inline">
+                                                    <form asp-action="Reject" asp-route-id="@app.PK_sMaUngTuyen" method="post" class="d-inline">
                                                         <button type="submit" class="btn btn-action btn-reject">Từ Chối</button>
                                                     </form>
                                                 }
@@ -134,7 +160,7 @@
                             }
                             else
                             {
-                                <tr><td colspan="4" class="text-center py-4 text-muted">Chưa có ứng viên nào ứng tuyển.</td></tr>
+                                <tr><td colspan="4" class="text-center py-5 text-muted">Chưa có ứng viên nào ứng tuyển.</td></tr>
                             }
                         </tbody>
                     </table>

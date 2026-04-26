@@ -19,10 +19,10 @@ namespace SourceCode.Controllers
         [Authorize(Roles = "sinhvien")]
         public async Task<IActionResult> SinhVien(string searchString)
         {
-            var jobsQuery = _context.Jobs.Include(j => j.Company).AsQueryable();
+            var jobsQuery = _context.TinTuyenDungs.AsQueryable();
             if (!string.IsNullOrEmpty(searchString))
             {
-                jobsQuery = jobsQuery.Where(j => j.Title.Contains(searchString));
+                jobsQuery = jobsQuery.Where(j => j.sViTriCV.Contains(searchString));
                 ViewBag.SearchString = searchString;
             }
 
@@ -32,6 +32,21 @@ namespace SourceCode.Controllers
         public IActionResult Enterprise()
         {
             return View();
+        }
+        [AllowAnonymous]
+        public async Task<IActionResult> EnterpriseDetails(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var enterprise = await _context.Doanhnghieps
+                .FirstOrDefaultAsync(m => m.PK_sMaDN == id || m.FK_sUserID == id);
+
+            if (enterprise == null)
+            {
+                return NotFound();
+            }
+
+            return View(enterprise); 
         }
     }
 }

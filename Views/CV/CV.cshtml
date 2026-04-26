@@ -1,38 +1,85 @@
-@using SourceCode.Models
-@model IEnumerable<SourceCode.Models.CV>
-
-@{
-    ViewData["Title"] = "Hồ sơ của tôi";
-}
+@model IEnumerable<SourceCode.Models.HoSoSinhVien>
 
 <div class="container mt-4">
-    <h2>Quản lý CV của tôi</h2>
-
-    @foreach (var item in Model)
-    {
-        <div class="alert alert-info">
-            Bạn đã có CV tạo ngày: @item.CreatedAt.ToString("dd/MM/yyyy")
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-list-alt"></i> Các hồ sơ hiện có</h4>
         </div>
-    }
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <div class="border-bottom mb-3 pb-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <p class="mb-1"><strong>Học vấn:</strong> @item.sTrinhDoHocVan</p>
+                                <p class="mb-1"><strong>Kỹ năng:</strong> @item.sKyNang</p>
+                                <p class="mb-0 text-muted small">Kinh nghiệm: @item.tKinhNghiem</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <a asp-action="Edit" asp-route-id="@item.PK_sMaHoSo" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> Sửa
+                                </a>
+                                @if (!string.IsNullOrEmpty(item.sFileCV) && item.sFileCV != "N/A")
+                                {
+                                    <a href="@item.sFileCV" target="_blank" class="btn btn-sm btn-info">
+                                        <i class="fas fa-file-download"></i> Xem File
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-3">
+                    <p class="text-muted italic">Bạn chưa có hồ sơ nào. Hãy tạo CV đầu tiên phía dưới!</p>
+                </div>
+            }
+        </div>
+    </div>
 
-    <hr />
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="fas fa-plus-circle"></i> Tạo thêm hồ sơ mới</h4>
+        </div>
+        <div class="card-body">
+            <form asp-controller="CV" asp-action="Create" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="fw-bold">Học vấn</label>
+                        <textarea name="sTrinhDoHocVan" class="form-control" rows="2" placeholder="VD: Đại học Công nghệ Giao thông vận tải..." required></textarea>
+                    </div>
 
-    <div class="card p-4 shadow-sm">
-        <h5>Tạo CV mới</h5>
-        <form asp-controller="CV" asp-action="Create" method="post">
-            <div class="mb-3">
-                <label>Học vấn</label>
-                <textarea name="Education" class="form-control"></textarea>
-            </div>
-            <div class="mb-3">
-                <label>Kỹ năng</label>
-                <textarea name="Skills" class="form-control"></textarea>
-            </div>
-            <div class="mb-3">
-                <label>Kinh nghiệm</label>
-                <textarea name="Experience" class="form-control"></textarea>
-            </div>
-            <button type="submit" class="btn btn-success">Lưu Hồ Sơ</button>
-        </form>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Kỹ năng</label>
+                        <input type="text" name="sKyNang" class="form-control" placeholder="VD: C#, SQL Server, Java..." required />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Tải lên File CV (PDF/Word)</label>
+                        <input type="file" name="fileCV" class="form-control" accept=".pdf,.doc,.docx" />
+                        <small class="text-muted">Chọn file từ máy tính của bạn</small>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="fw-bold">Kinh nghiệm làm việc</label>
+                        <textarea name="tKinhNghiem" class="form-control" rows="3" placeholder="Mô tả các công việc đã làm..."></textarea>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="fw-bold">Thông tin bổ sung</label>
+                        <textarea name="tThongTinKhac" class="form-control" rows="2" placeholder="Sở thích, chứng chỉ khác..."></textarea>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success px-5 shadow-sm">
+                        <i class="fas fa-save"></i> Lưu hồ sơ mới
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>

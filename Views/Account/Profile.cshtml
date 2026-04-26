@@ -1,10 +1,9 @@
 ﻿@using SourceCode.Models
+@using System.Security.Claims
 @model SourceCode.Models.User
 
 @{
     ViewData["Title"] = "Thông tin cá nhân";
-    // Nếu bạn muốn dùng Layout chung của hệ thống thì bỏ dòng Layout = null;
-    // Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,33 +19,43 @@
                     <div class="row mb-3 border-bottom pb-2">
                         <label class="col-sm-3 col-form-label fw-bold">Họ và tên:</label>
                         <div class="col-sm-9 d-flex align-items-center">
-                            <span class="text-dark">@Model.FullName</span>
+                            <span class="text-dark">@Model.sHoten</span>
                         </div>
                     </div>
                     <div class="row mb-3 border-bottom pb-2">
                         <label class="col-sm-3 col-form-label fw-bold">Email:</label>
                         <div class="col-sm-9 d-flex align-items-center">
-                            <span class="text-dark">@Model.Email</span>
+                            <span class="text-dark">@Model.sEmail</span>
                         </div>
                     </div>
                     <div class="row mb-3 border-bottom pb-2">
                         <label class="col-sm-3 col-form-label fw-bold">Số điện thoại:</label>
                         <div class="col-sm-9 d-flex align-items-center">
-                            <span class="text-dark">@(string.IsNullOrEmpty(Model.Phone) ? "Chưa cập nhật" : Model.Phone)</span>
+                            <span class="text-dark">@(string.IsNullOrEmpty(Model.sSDT) ? "Chưa cập nhật" : Model.sSDT)</span>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-3 col-form-label fw-bold">Vai trò:</label>
                         <div class="col-sm-9 d-flex align-items-center">
-                            <span class="badge bg-info text-dark">@Model.Role</span>
+                            <span class="badge bg-info text-dark">@Model.sVaiTro</span>
                         </div>
                     </div>
                     
                     <div class="mt-4 d-flex justify-content-end">
-                        <a asp-controller="Home" asp-action="SinhVien" class="btn btn-outline-secondary me-2">
-                            <i class="fas fa-arrow-left me-1"></i> Quay lại
-                        </a>
-                        <button class="btn btn-primary">
+                        @if (User.Identity.IsAuthenticated && User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "doanhnghiep"))
+                        {
+                            <a asp-controller="Home" asp-action="Enterprise" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Job" asp-action="SinhVien" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại
+                            </a>
+                        }
+    
+                        <button class="btn btn-primary px-4">
                             <i class="fas fa-edit me-1"></i> Chỉnh sửa thông tin
                         </button>
                     </div>

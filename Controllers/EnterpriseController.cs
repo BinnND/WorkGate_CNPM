@@ -22,10 +22,11 @@ namespace SourceCode.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
 
-            var applications = await _context.Applications
-                .Include(a => a.Job)
-                .Include(a => a.Student)
-                .Where(a => a.Job.CompanyId == int.Parse(userId))
+            var applications = await _context.UngTuyens
+                .Include(a => a.TinTuyenDung)
+                .Include(a => a.HoSoSinhVien)
+                // So sánh trực tiếp chuỗi với chuỗi
+                .Where(a => a.TinTuyenDung.FK_sMaDN == userId)
                 .ToListAsync();
 
             return View(applications);
@@ -35,24 +36,27 @@ namespace SourceCode.Controllers
 
         public async Task<IActionResult> QuanLyTuyenDung()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var jobs = await _context.Jobs.Where(j => j.CompanyId == userId).ToListAsync();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var jobs = await _context.TinTuyenDungs
+                .Where(j => j.FK_sMaDN == userId)
+                .ToListAsync();
+
             return View(jobs);
         }
 
         [HttpPost]
         public async Task<IActionResult> Approve(int id)
         {
-            var app = await _context.Applications.FindAsync(id);
-            if (app != null) { app.Status = "Approved"; await _context.SaveChangesAsync(); }
+            var app = await _context.UngTuyens.FindAsync(id);
+            if (app != null) { app.sTrangThaiUngTuyen = "Approved"; await _context.SaveChangesAsync(); }
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         public async Task<IActionResult> Reject(int id)
         {
-            var app = await _context.Applications.FindAsync(id);
-            if (app != null) { app.Status = "Rejected"; await _context.SaveChangesAsync(); }
+            var app = await _context.UngTuyens.FindAsync(id);
+            if (app != null) { app.sTrangThaiUngTuyen = "Rejected"; await _context.SaveChangesAsync(); }
             return RedirectToAction(nameof(Index));
         }
     }

@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SourceCode.Data;
 using SourceCode.Models;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace SourceCode.Controllers
 {
@@ -17,32 +16,55 @@ namespace SourceCode.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "sinhvien")]
-        public async Task<IActionResult> Apply(int jobId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Apply(string jobId)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString)) return RedirectToAction("Login", "Account");
+            // 1. Lấy ID tài khoản đang đăng nhập
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
 
-            int userId = int.Parse(userIdString);
-            var userCv = await _context.CVs.FirstOrDefaultAsync(c => c.UserId == userId);
-            if (userCv == null)
+            // 2. Tìm mã hồ sơ của sinh viên này
+            var hoSo = await _context.HoSoSinhViens.FirstOrDefaultAsync(h => h.FK_sMaSV == userId);
+
+            if (hoSo == null)
             {
-                TempData["Error"] = "Bạn cần tạo CV trước khi ứng tuyển!";
+                TempData["Error"] = "Vui lòng cập nhật hồ sơ (CV Online) trước khi ứng tuyển!";
                 return RedirectToAction("Index", "CV");
             }
-            var application = new Application
+
+            // 3. Kiểm tra xem đã ứng tuyển tin này chưa để tránh trùng lặp
+            var exists = await _context.UngTuyens
+                .AnyAsync(u => u.FK_sMaTin == jobId && u.FK_sMaHoSo == hoSo.PK_sMaHoSo);
+
+            if (exists)
             {
-                JobId = jobId,
-                UserId = userId,
-                CVId = userCv.Id,
-                ApplyDate = DateTime.Now,
-                Status = "Pending" 
+                TempData["Error"] = "Bạn đã ứng tuyển công việc này rồi!";
+                return RedirectToAction("SinhVien", "Home");
+            }
+
+            // 4. Khởi tạo đối tượng ứng tuyển với đầy đủ các trường NOT NULL
+            var apply = new UngTuyen
+            {
+                PK_sMaUngTuyen = "UT" + DateTime.Now.Ticks.ToString().Substring(10), // Tự tạo khóa chính
+                FK_sMaTin = jobId,
+                FK_sMaHoSo = hoSo.PK_sMaHoSo,
+                dNgayUngTuyen = DateTime.Now,
+                sTrangThaiUngTuyen = "Pending" // Trạng thái ban đầu: Chờ duyệt
             };
 
-            _context.Applications.Add(application);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.UngTuyens.Add(apply);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Ứng tuyển thành công! Nhà tuyển dụng sẽ sớm liên hệ với bạn.";
+            }
+            catch (Exception ex)
+            {
+                // Bắt lỗi InnerException để biết chính xác cột nào bị NULL
+                TempData["Error"] = "Lỗi hệ thống: " + (ex.InnerException?.Message ?? ex.Message);
+            }
 
-            TempData["Success"] = "Ứng tuyển thành công!";
+            // Điều hướng về lại trang danh sách việc làm
             return RedirectToAction("SinhVien", "Home");
         }
     }

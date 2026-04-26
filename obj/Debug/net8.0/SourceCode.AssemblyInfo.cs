@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SourceCode")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ed54704b29c5abc64eb84d7580865d8f1d4fb93c")]
 [assembly: System.Reflection.AssemblyProductAttribute("SourceCode")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SourceCode")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

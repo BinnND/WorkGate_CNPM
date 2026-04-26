@@ -1,4 +1,4 @@
-﻿@model SourceCode.Models.Job
+﻿@model SourceCode.Models.TinTuyenDung
 @{
     ViewData["Title"] = "Đăng tin mới";
 }
@@ -11,32 +11,49 @@
                     <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Tạo Tin Tuyển Dụng Mới</h5>
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Create" method="post">
+                    <form asp-controller="Job" asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">Tiêu đề công việc</label>
-                            <input asp-for="Title" class="form-control" placeholder="VD: Senior .NET Developer" />
-                            <span asp-validation-for="Title" class="text-danger"></span>
+                            <input asp-for="sViTriCV" class="form-control" placeholder="VD: Senior .NET Developer" required />
+                            <span asp-validation-for="sViTriCV" class="text-danger"></span>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Địa điểm</label>
-                                <input asp-for="Location" class="form-control" placeholder="Hà Nội, TP.HCM..." />
+                                <input asp-for="sDiaDiem" class="form-control" placeholder="Hà Nội, TP.HCM..." required />
+                                <span asp-validation-for="sDiaDiem" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Lương (VNĐ)</label>
-                                <input asp-for="Salary" type="number" class="form-control" />
+                                <input asp-for="fMucLuong" type="number" class="form-control" placeholder="Nhập số tiền..." />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Số lượng tuyển</label>
+                                <input asp-for="iSoLuong" type="number" class="form-control" placeholder="VD: 5" min="1" required />
+                                <span asp-validation-for="iSoLuong" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Hạn nộp hồ sơ</label>
+                                <input asp-for="dHanNop" type="date" class="form-control" required />
+                                <span asp-validation-for="dHanNop" class="text-danger"></span>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Mô tả công việc</label>
-                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <textarea asp-for="tMoTaCV" class="form-control" rows="4" required></textarea>
+                            <span asp-validation-for="tMoTaCV" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Yêu cầu ứng viên</label>
-                            <textarea asp-for="Requirements" class="form-control" rows="4"></textarea>
+                            <textarea asp-for="sYeuCauChuyenMon" class="form-control" rows="4"></textarea>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
@@ -49,3 +66,9 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

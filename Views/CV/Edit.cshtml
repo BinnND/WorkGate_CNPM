@@ -1,0 +1,45 @@
+﻿@model SourceCode.Models.HoSoSinhVien
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-warning">
+            <h4 class="mb-0">Chỉnh sửa hồ sơ của tôi</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Update" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="PK_sMaHoSo" />
+                <input type="hidden" asp-for="sFileCV" /> <div class="mb-3">
+                <label class="fw-bold">Học vấn</label>
+                <textarea asp-for="sTrinhDoHocVan" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold">Kỹ năng</label>
+                <input asp-for="sKyNang" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold">Thay đổi File CV (PDF/Word)</label>
+                <input type="file" name="fileCV" class="form-control" accept=".pdf,.doc,.docx" />
+                @if (!string.IsNullOrEmpty(Model.sFileCV))
+                {
+                    <small class="text-muted">File hiện tại: <a href="@Model.sFileCV" target="_blank">Xem lại</a></small>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold">Kinh nghiệm</label>
+                <textarea asp-for="tKinhNghiem" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold">Thông tin khác</label>
+                <textarea asp-for="tThongTinKhac" class="form-control" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
+        </form>
+    </div>
+</div>
+</div>

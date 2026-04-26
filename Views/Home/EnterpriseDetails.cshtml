@@ -1,0 +1,81 @@
+﻿@model SourceCode.Models.Doanhnghiep
+
+@{
+    ViewData["Title"] = "Thông Tin Doanh Nghiệp";
+    // Nếu bạn muốn dùng layout chung của sinh viên, hãy bỏ dòng Layout = null bên dưới
+    Layout = "_Layout"; 
+}
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="SinhVien">Tìm việc</a></li>
+            <li class="breadcrumb-item active">Chi tiết doanh nghiệp</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm border-0 rounded-lg">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                    <i class="fas fa-building fa-2x"></i>
+                </div>
+                <div>
+                    <h2 class="mb-0 fw-bold text-dark">@Model.sTenDN</h2>
+                    <span class="badge @(Model.sTrangThaiDuyet == "Đã duyệt" ? "bg-success" : "bg-warning")">
+                        <i class="fas fa-check-circle me-1"></i> @Model.sTrangThaiDuyet
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-7">
+                    <h5 class="fw-bold border-bottom pb-2 mb-3">Thông tin chung</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="fas fa-id-card me-2 text-primary"></i>
+                            <strong>Mã doanh nghiệp:</strong> @Model.PK_sMaDN
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                            <strong>Địa chỉ:</strong> @Model.sDiaChi
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-user-tie me-2 text-primary"></i>
+                            <strong>Người đại diện:</strong> @Model.sNguoiDaiDien
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-file-invoice me-2 text-primary"></i>
+                            <strong>Mã số thuế:</strong> @Model.FK_sMaSoThue
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-5 bg-light rounded p-4">
+                    <h5 class="fw-bold mb-3">Pháp lý & Hoạt động</h5>
+                    <p><strong>Giấy phép KD:</strong> @Model.sGiayPhepKD</p>
+                    <p><strong>Ngày kích hoạt:</strong> @(Model.dNgayKichHoat?.ToString("dd/MM/yyyy") ?? "Đang cập nhật")</p>
+                    <div class="alert alert-info border-0 small">
+                        <i class="fas fa-info-circle me-1"></i> Doanh nghiệp này đã cam kết tuân thủ các quy định tuyển dụng của WorkGate.
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex gap-2">
+                <a asp-action="SinhVien" class="btn btn-outline-secondary px-4">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                </a>
+                <button class="btn btn-primary px-4">Theo dõi doanh nghiệp</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .breadcrumb-item a { text-decoration: none; color: #6c757d; }
+        .breadcrumb-item.active { color: #3182ce; font-weight: 600; }
+    </style>
+}

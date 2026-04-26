@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -10,54 +11,65 @@
     
     <style>
         body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; }
-        .navbar-custom { background-color: white; border-bottom: 1px solid #e2e8f0; height: 65px; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; }
+        .navbar-custom { background-color: white; border-bottom: 1px solid #e2e8f0; height: 65px; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .nav-left { display: flex; align-items: center; height: 100%; }
         .brand { color: #2c5282; font-weight: 700; font-size: 24px; text-decoration: none; margin-right: 40px; }
-        .nav-links { display: flex; list-style: none; margin: 0; padding: 0; height: 65px; }
-        .nav-links li { margin-right: 30px; height: 100%; }
-        .nav-links a { color: #4a5568; text-decoration: none; font-weight: 600; display: flex; align-items: center; height: 100%; padding: 0 5px; border-bottom: 3px solid transparent; transition: all 0.2s; }
-        .nav-links a.active { color: #3182ce; border-bottom-color: #3182ce; }
         .avatar { width: 35px; height: 35px; background-color: #edf2f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #2c5282; margin-right: 10px; border: 1px solid #cbd5e0; }
+        .user-menu-btn { display: flex; align-items: center; padding: 5px 12px; border-radius: 8px; transition: background 0.2s; }
+        .user-menu-btn:hover { background-color: #f7fafc; }
     </style>
 </head>
 <body>
     <header class="navbar-custom">
         <div class="nav-left">
-            <i class="fas fa-bars text-secondary me-3" style="cursor:pointer"></i>
-            <a asp-controller="Home" asp-action="SinhVien" class="brand">WorkGate</a>
-            
-            <ul class="nav-links">
-                <li>
-                    <a asp-controller="Home" asp-action="SinhVien" 
-                       class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "SinhVien" ? "active" : "")">
-                       Tìm Việc
-                    </a>
-                </li>
-                <li>
-                    <a asp-controller="CV" asp-action="Index" 
-                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "CV" ? "active" : "")">
-                       Hồ Sơ
-                    </a>
-                </li>
-            </ul>
+            @{
+                var isAuthenticated = User.Identity.IsAuthenticated;
+                var isEnterprise = isAuthenticated && User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "doanhnghiep");
+                
+                var homeController = isAuthenticated ? (isEnterprise ? "Home" : "Job") : "Account";
+                var homeAction = isAuthenticated ? (isEnterprise ? "Enterprise" : "SinhVien") : "Login";
+            }
+            <a asp-controller="@homeController" asp-action="@homeAction" class="brand">WorkGate</a>
         </div>
 
-        <div class="dropdown">
-            <div class="d-flex align-items-center" id="userMenu" data-bs-toggle="dropdown" style="cursor:pointer">
-                <div class="avatar">@(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")</div>
-                <span class="fw-bold text-dark">@User.Identity.Name</span>
-                <i class="fas fa-chevron-down ms-2 text-muted" style="font-size: 12px;"></i>
+        @if (isAuthenticated)
+        {
+            <div class="dropdown">
+                <div class="user-menu-btn" id="userMenu" data-bs-toggle="dropdown" style="cursor:pointer">
+                    <div class="avatar">@(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")</div>
+                    <div class="d-none d-md-block">
+                        <span class="fw-bold text-dark d-block">@User.Identity.Name</span>
+                        <small class="text-muted" style="font-size: 11px;">@(isEnterprise ? "Doanh nghiệp" : "Ứng viên")</small>
+                    </div>
+                    <i class="fas fa-chevron-down ms-2 text-muted" style="font-size: 10px;"></i>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2">
+                    <li>
+                        <a class="dropdown-item py-2 rounded" asp-controller="Job" asp-action="Profile">
+                            <i class="fas fa-user-circle me-2 text-primary"></i>Thông tin cá nhân
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item py-2 rounded text-danger" asp-controller="Account" asp-action="Logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                        </a>
+                    </li>
+                </ul>
             </div>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                <li><a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile"><i class="fas fa-user-circle me-2"></i>Thông tin cá nhân</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item py-2 text-danger" asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
-            </ul>
-        </div>
+        }
+        else
+        {
+            <div class="auth-buttons">
+                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary me-2">Đăng nhập</a>
+                <a asp-controller="Account" asp-action="Register" class="btn btn-primary">Đăng ký</a>
+            </div>
+        }
     </header>
 
     <div class="container-fluid pt-4">
-        @RenderBody() </div>
+        @RenderBody() 
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
