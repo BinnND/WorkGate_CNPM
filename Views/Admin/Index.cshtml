@@ -1,4 +1,239 @@
-<h2>Dashboard</h2>
-<p>User: @ViewBag.Users</p>
-<p>Jobs: @ViewBag.Jobs</p>
-<p>Applications: @ViewBag.Applications</p>
+@using System;
+@using System.Collections.Generic;
+@using SourceCode.Models;
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="wg-dash container-fluid px-4 py-4">
+    <h2 class="wg-title mb-4">Tổng quan hệ thống</h2>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="wg-stat-card card p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <p class="text-muted small mb-0">Việc làm</p>
+                    <div class="wg-icon-wrap">
+                        <i class="bi bi-briefcase text-primary"></i>
+                    </div>
+                </div>
+                <h3 class="wg-num mb-1">@ViewBag.TotalJobs</h3>
+                <span class="small text-primary">+22 tin mới tháng này</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="wg-stat-card card p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <p class="text-muted small mb-0">Đơn ứng tuyển</p>
+                    <div class="wg-icon-wrap">
+                        <i class="bi bi-file-text text-primary"></i>
+                    </div>
+                </div>
+                <h3 class="wg-num mb-1">@ViewBag.TotalApplications</h3>
+                <span class="small text-primary">+89 đơn tuần này</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="wg-stat-card card p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <p class="text-muted small mb-0">Sinh viên</p>
+                    <div class="wg-icon-wrap">
+                        <i class="bi bi-mortarboard text-primary"></i>
+                    </div>
+                </div>
+                <h3 class="wg-num mb-1">@ViewBag.TotalStudents</h3>
+                <span class="small text-primary">đã đăng ký</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="wg-stat-card card p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <p class="text-muted small mb-0">Tỷ lệ việc làm</p>
+                    <div class="wg-icon-wrap wg-icon-green">
+                        <i class="bi bi-graph-up-arrow text-success"></i>
+                    </div>
+                </div>
+                <h3 class="wg-num mb-1">@ViewBag.JobRate%</h3>
+                <span class="small text-success">↑ 2.5% so với quý trước</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-7">
+            <div class="wg-card card h-100 p-4">
+                <h6 class="wg-card-title mb-4">Hoạt động gần đây</h6>
+                @foreach (var job in ViewBag.RecentJobs)
+                {
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="wg-act-icon wg-act-blue me-3">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 small fw-semibold">@job.sViTriCV đang tuyển dụng mới</p>
+                            <small class="text-muted">Vừa đăng xong</small>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="wg-card card h-100 p-4">
+                <h6 class="wg-card-title mb-4">Doanh nghiệp hàng đầu</h6>
+                @foreach (var comp in ViewBag.TopCompanies)
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="wg-act-icon wg-act-blue me-3">
+                                <i class="bi bi-briefcase"></i>
+                            </div>
+                            <div>
+                                <div class="small fw-semibold">@comp.sTenDN</div>
+                                <div class="text-muted" style="font-size:11px;">@comp.SoTin tin tuyển dụng</div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="small fw-semibold text-primary">@comp.SoTin</div>
+                            <div class="text-muted" style="font-size:11px;">đã tuyển</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <h6 class="wg-card-title mb-3">Thao tác nhanh</h6>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <a asp-action="Users" class="wg-quick-card card p-4 text-center text-decoration-none d-block">
+                <div class="wg-quick-icon mx-auto mb-3">
+                    <i class="bi bi-people fs-4 text-primary"></i>
+                </div>
+                <p class="small fw-semibold mb-1">Quản lý người dùng</p>
+                <small class="text-muted">Xem và quản lý tài khoản</small>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a asp-action="JobsPending" class="wg-quick-card card p-4 text-center text-decoration-none d-block">
+                <div class="wg-quick-icon mx-auto mb-3">
+                    <i class="bi bi-check-circle fs-4 text-primary"></i>
+                </div>
+                <p class="small fw-semibold mb-1">Phê duyệt tin</p>
+                <small class="text-muted">3 tin chờ duyệt</small>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a asp-action="Reports" class="wg-quick-card card p-4 text-center text-decoration-none d-block">
+                <div class="wg-quick-icon mx-auto mb-3">
+                    <i class="bi bi-graph-up fs-4 text-primary"></i>
+                </div>
+                <p class="small fw-semibold mb-1">Báo cáo</p>
+                <small class="text-muted">Xem thống kê chi tiết</small>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a asp-action="ExportReport" class="wg-quick-card card p-4 text-center text-decoration-none d-block">
+                <div class="wg-quick-icon mx-auto mb-3">
+                    <i class="bi bi-file-earmark-text fs-4 text-primary"></i>
+                </div>
+                <p class="small fw-semibold mb-1">Xuất báo cáo</p>
+                <small class="text-muted">Tạo báo cáo theo kỳ</small>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .wg-dash {
+        background: #f3f4f6;
+        min-height: 100vh;
+    }
+
+    .wg-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .wg-stat-card {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        background: #fff;
+        box-shadow: none !important;
+    }
+
+    .wg-num {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .wg-icon-wrap {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: #eff6ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .wg-icon-green {
+        background: #f0fdf4;
+    }
+
+    .wg-card {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        background: #fff;
+        box-shadow: none !important;
+    }
+
+    .wg-card-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .wg-act-icon {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .wg-act-blue {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .wg-quick-card {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        background: #fff;
+        color: #111827 !important;
+        box-shadow: none !important;
+        transition: border-color 0.15s, transform 0.15s;
+    }
+
+    .wg-quick-card:hover {
+        border-color: #93c5fd !important;
+        transform: translateY(-3px);
+    }
+
+    .wg-quick-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: #eff6ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>

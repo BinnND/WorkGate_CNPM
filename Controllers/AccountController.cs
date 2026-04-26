@@ -72,28 +72,32 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(string email, string password)
     {
-        var user = _context.Users.FirstOrDefault(u => u.sEmail == email);
+        var user = _context.Users.FirstOrDefault(u => u.sEmail.Trim() == email.Trim());
 
         if (user != null && VerifyPassword(password, user.sMatKhau))
         {
+            string userRole = user.sVaiTro.ToLower().Trim();
+            HttpContext.Session.SetString("UserRole", userRole);
+
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.PK_sUserID.ToString()),
-                new Claim(ClaimTypes.Name, user.sHoten), 
-                new Claim(ClaimTypes.Email, user.sEmail),
-                new Claim(ClaimTypes.Role, user.sVaiTro)
-            };
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.PK_sUserID),
+            new Claim(ClaimTypes.Name, user.sHoten),
+            new Claim(ClaimTypes.Role, userRole)
+        };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-            if (user.sVaiTro == "sinhvien")
+            if (userRole == "admin")
+            {
+                return RedirectToAction("Index", "Admin");
+            }
+            else if (userRole == "sinhvien")
             {
                 return RedirectToAction("SinhVien", "Home");
             }
-            else if (user.sVaiTro == "doanhnghiep")
+            else if (userRole == "doanhnghiep")
             {
                 return RedirectToAction("Enterprise", "Home");
             }

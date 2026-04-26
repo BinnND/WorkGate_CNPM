@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SourceCode.Data;
 using SourceCode.Models;
 using System.Linq;
+using System.Security.Claims;
 
 namespace SourceCode.Controllers
 {
@@ -29,10 +30,6 @@ namespace SourceCode.Controllers
             var jobsList = await jobsQuery.ToListAsync();
             return View(jobsList);
         }
-        public IActionResult Enterprise()
-        {
-            return View();
-        }
         [AllowAnonymous]
         public async Task<IActionResult> EnterpriseDetails(string id)
         {
@@ -47,6 +44,31 @@ namespace SourceCode.Controllers
             }
 
             return View(enterprise); 
+        }
+        public async Task<IActionResult> Enterprise()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var dn = await _context.Doanhnghieps.FirstOrDefaultAsync(d => d.FK_sUserID == userId);
+            if (dn == null) return RedirectToAction("Login", "Account");
+
+            // Danh sách tin của doanh nghiệp
+            var tins = await _context.TinTuyenDungs
+                .Where(t => t.FK_sMaDN == dn.PK_sMaDN)
+                .OrderByDescending(t => t.dNgayDang)
+                .ToListAsync();
+
+            // Danh sách ứng viên cho các tin đó
+            var maTins = tins.Select(t => t.PK_sMaTin).ToList();
+            var ungTuyens = await _context.UngTuyens
+                .Include(u => u.TinTuyenDung)
+                .Include(u => u.HoSoSinhVien)
+                .Where(u => maTins.Contains(u.FK_sMaTin))
+                .ToListAsync();
+
+            ViewBag.TinTuyenDungs = tins;
+            ViewBag.UngTuyens = ungTuyens;
+            ViewBag.TenDN = dn.sTenDN;
+            return View();
         }
     }
 }

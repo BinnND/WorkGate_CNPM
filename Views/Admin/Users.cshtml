@@ -1,0 +1,226 @@
+@model IEnumerable<SourceCode.Models.User>
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<div class="wg-dash container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="wg-title mb-0">Quản lý người dùng</h2>
+        <span class="text-muted small">Tổng: <strong>@Model.Count()</strong> tài khoản</span>
+    </div>
+
+    @* Filter tabs *@
+    <div class="wg-tabs mb-3">
+        <button class="wg-tab active" onclick="filterTable('all', this)">Tất cả</button>
+        <button class="wg-tab" onclick="filterTable('admin', this)">Admin</button>
+        <button class="wg-tab" onclick="filterTable('doanhnghiep', this)">Doanh nghiệp</button>
+        <button class="wg-tab" onclick="filterTable('sinhvien', this)">Sinh viên</button>
+    </div>
+
+    @* Search *@
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="wg-search" placeholder="Tìm theo tên, email..." oninput="searchTable()" />
+    </div>
+
+    <div class="wg-card card p-0">
+        <table class="table wg-table mb-0" id="userTable">
+            <thead>
+                <tr>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr data-role="@user.sVaiTro?.ToLower()">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="wg-avatar">@(user.sHoten?.Substring(0, 1).ToUpper() ?? "?")</div>
+                                <span class="fw-semibold small">@user.sHoten</span>
+                            </div>
+                        </td>
+                        <td class="small text-muted">@user.sEmail</td>
+                        <td class="small text-muted">@(string.IsNullOrEmpty(user.sSDT) ? "—" : user.sSDT)</td>
+                        <td>
+                            @{
+                                var roleClass = user.sVaiTro?.ToLower() switch {
+                                    "admin" => "wg-badge-red",
+                                    "doanhnghiep" => "wg-badge-blue",
+                                    "sinhvien" => "wg-badge-green",
+                                    _ => "wg-badge-gray"
+                                };
+                                var roleLabel = user.sVaiTro?.ToLower() switch {
+                                    "admin" => "Admin",
+                                    "doanhnghiep" => "Doanh nghiệp",
+                                    "sinhvien" => "Sinh viên",
+                                    _ => user.sVaiTro
+                                };
+                            }
+                            <span class="wg-badge @roleClass">@roleLabel</span>
+                        </td>
+                        <td>
+                            @{
+                                var statusClass = user.sTrangThaiTK?.ToLower() switch {
+                                    "active" or "approved" => "wg-badge-green",
+                                    "locked" or "banned" => "wg-badge-red",
+                                    _ => "wg-badge-gray"
+                                };
+                                var statusLabel = user.sTrangThaiTK?.ToLower() switch {
+                                    "active" or "approved" => "Hoạt động",
+                                    "locked" or "banned" => "Đã khóa",
+                                    _ => user.sTrangThaiTK ?? "—"
+                                };
+                            }
+                            <span class="wg-badge @statusClass">@statusLabel</span>
+                        </td>
+                        <td class="small text-muted">@user.dNgayTao.ToString("dd/MM/yyyy")</td>
+                        <td class="text-end">
+                            <div class="d-flex gap-2 justify-content-end">
+                                @if (user.sTrangThaiTK?.ToLower() == "locked" || user.sTrangThaiTK?.ToLower() == "banned")
+                                {
+                                    <a asp-action="UnlockUser" asp-route-id="@user.PK_sUserID"
+                                       class="wg-btn wg-btn-green"
+                                       onclick="return confirm('Mở khóa tài khoản này?')">
+                                        <i class="bi bi-unlock"></i> Mở khóa
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-action="LockUser" asp-route-id="@user.PK_sUserID"
+                                       class="wg-btn wg-btn-red"
+                                       onclick="return confirm('Khóa tài khoản này?')">
+                                        <i class="bi bi-lock"></i> Khóa
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-people fs-1 d-block mb-2"></i>
+                Không có người dùng nào
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .wg-dash { background: #f3f4f6; min-height: 100vh; }
+    .wg-title { font-size: 1.3rem; font-weight: 600; color: #111827; }
+
+    .wg-card {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        background: #fff;
+        box-shadow: none !important;
+        overflow: hidden;
+    }
+
+    .wg-table { font-size: 13px; margin: 0; }
+    .wg-table thead tr { background: #f9fafb; }
+    .wg-table thead th {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .wg-table tbody td {
+        padding: 13px 16px;
+        border-bottom: 1px solid #f3f4f6;
+        vertical-align: middle;
+        color: #111827;
+    }
+    .wg-table tbody tr:last-child td { border-bottom: none; }
+    .wg-table tbody tr:hover { background: #f9fafb; }
+
+    .wg-avatar {
+        width: 30px; height: 30px;
+        border-radius: 50%;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .wg-badge {
+        font-size: 11px; font-weight: 500;
+        padding: 3px 10px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    .wg-badge-blue  { background: #eff6ff; color: #1d4ed8; }
+    .wg-badge-green { background: #f0fdf4; color: #15803d; }
+    .wg-badge-red   { background: #fef2f2; color: #b91c1c; }
+    .wg-badge-gray  { background: #f3f4f6; color: #6b7280; }
+
+    .wg-btn {
+        font-size: 12px; font-weight: 500;
+        padding: 5px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex; align-items: center; gap: 4px;
+        transition: opacity 0.15s;
+    }
+    .wg-btn:hover { opacity: 0.8; }
+    .wg-btn-red   { background: #fef2f2; color: #b91c1c; }
+    .wg-btn-green { background: #f0fdf4; color: #15803d; }
+
+    .wg-search {
+        width: 300px; height: 36px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0 12px;
+        font-size: 13px;
+        outline: none;
+        background: #fff;
+        color: #111827;
+    }
+    .wg-search:focus { border-color: #93c5fd; }
+
+    .wg-tabs { display: flex; gap: 6px; }
+    .wg-tab {
+        font-size: 13px; font-weight: 500;
+        padding: 6px 16px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .wg-tab:hover { border-color: #93c5fd; color: #2563eb; }
+    .wg-tab.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+</style>
+
+<script>
+    function filterTable(role, btn) {
+        document.querySelectorAll('.wg-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('#userTable tbody tr').forEach(row => {
+            row.style.display = (role === 'all' || row.dataset.role === role) ? '' : 'none';
+        });
+    }
+
+    function searchTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#userTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+</script>

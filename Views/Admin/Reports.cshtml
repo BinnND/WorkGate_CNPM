@@ -1,0 +1,194 @@
+@{
+    ViewData["Title"] = "Báo cáo thống kê";
+
+    var jobsByMonth = ViewBag.JobsByMonth as IEnumerable<dynamic> ?? new List<dynamic>();
+    var appsByMonth = ViewBag.AppsByMonth as IEnumerable<dynamic> ?? new List<dynamic>();
+
+    var jobLabels  = string.Join(",", Enumerable.Range(1, 12).Select(m => $"\"T{m}\""));
+    var jobData    = string.Join(",", Enumerable.Range(1, 12).Select(m => {
+        foreach (var x in jobsByMonth) if ((int)x.Month == m) return (int)x.Count;
+        return 0;
+    }));
+    var appData    = string.Join(",", Enumerable.Range(1, 12).Select(m => {
+        foreach (var x in appsByMonth) if ((int)x.Month == m) return (int)x.Count;
+        return 0;
+    }));
+
+    int total    = (int)(ViewBag.TotalJobs    ?? 0);
+    int approved = (int)(ViewBag.ApprovedJobs ?? 0);
+    int rejected = (int)(ViewBag.RejectedJobs ?? 0);
+    int pending  = (int)(ViewBag.PendingJobs  ?? 0);
+}
+
+<div class="wg-dash container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="wg-title mb-0">Báo cáo thống kê @ViewBag.Year</h2>
+    </div>
+
+    @* Stat summary *@
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="wg-stat-card card p-3">
+                <p class="text-muted small mb-1">Tổng tin tuyển dụng</p>
+                <h3 class="wg-num">@total</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="wg-stat-card card p-3">
+                <p class="text-muted small mb-1">Đã duyệt</p>
+                <h3 class="wg-num text-success">@approved</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="wg-stat-card card p-3">
+                <p class="text-muted small mb-1">Từ chối</p>
+                <h3 class="wg-num text-danger">@rejected</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="wg-stat-card card p-3">
+                <p class="text-muted small mb-1">Chờ duyệt</p>
+                <h3 class="wg-num text-warning">@pending</h3>
+            </div>
+        </div>
+    </div>
+
+    @* Line charts *@
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="wg-card card p-4">
+                <h6 class="wg-card-title mb-3">Tin tuyển dụng theo tháng</h6>
+                <canvas id="jobChart" height="220"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="wg-card card p-4">
+                <h6 class="wg-card-title mb-3">Đơn ứng tuyển theo tháng</h6>
+                <canvas id="appChart" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+
+    @* Donut + Top companies *@
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="wg-card card p-4 h-100">
+                <h6 class="wg-card-title mb-3">Tỷ lệ trạng thái tin</h6>
+                <canvas id="statusChart" height="220"></canvas>
+                <div class="d-flex justify-content-center gap-3 mt-3" style="font-size:12px;">
+                    <span><span class="wg-dot" style="background:#22c55e;"></span> Đã duyệt (@approved)</span>
+                    <span><span class="wg-dot" style="background:#ef4444;"></span> Từ chối (@rejected)</span>
+                    <span><span class="wg-dot" style="background:#f59e0b;"></span> Chờ (@pending)</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="wg-card card p-4 h-100">
+                <h6 class="wg-card-title mb-3">Top doanh nghiệp đăng tin nhiều nhất</h6>
+                @foreach (var comp in ViewBag.TopCompanies)
+                {
+                    int soTin = (int)comp.SoTin;
+                    int maxTin = 1;
+                    foreach (var c in ViewBag.TopCompanies) if ((int)c.SoTin > maxTin) maxTin = (int)c.SoTin;
+                    int pct = maxTin > 0 ? (int)Math.Round((double)soTin / maxTin * 100) : 0;
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small fw-semibold">@comp.sTenDN</span>
+                            <span class="small text-muted">@soTin tin</span>
+                        </div>
+                        <div class="wg-bar-bg">
+                            <div class="wg-bar-fill" style="width:@pct%"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .wg-dash { background: #f3f4f6; min-height: 100vh; }
+    .wg-title { font-size: 1.3rem; font-weight: 600; color: #111827; }
+
+    .wg-stat-card {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        background: #fff; box-shadow: none !important;
+    }
+    .wg-num { font-size: 1.8rem; font-weight: 600; color: #111827; }
+
+    .wg-card {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        background: #fff; box-shadow: none !important;
+    }
+    .wg-card-title { font-size: 14px; font-weight: 600; color: #111827; }
+
+    .wg-bar-bg {
+        height: 8px; background: #f3f4f6;
+        border-radius: 99px; overflow: hidden;
+    }
+    .wg-bar-fill {
+        height: 100%; background: #2563eb;
+        border-radius: 99px; transition: width 0.6s ease;
+    }
+
+    .wg-dot {
+        display: inline-block;
+        width: 10px; height: 10px;
+        border-radius: 50%; margin-right: 4px;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const labels = [@Html.Raw(jobLabels)];
+    const jobData = [@Html.Raw(jobData)];
+    const appData = [@Html.Raw(appData)];
+
+    const lineOpts = (label, data, color) => ({
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label,
+                data,
+                borderColor: color,
+                backgroundColor: color + '18',
+                borderWidth: 2,
+                pointRadius: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: '#f3f4f6' } },
+                x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('jobChart'), lineOpts('Tin tuyển dụng', jobData, '#2563eb'));
+    new Chart(document.getElementById('appChart'), lineOpts('Đơn ứng tuyển', appData, '#7c3aed'));
+
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Đã duyệt', 'Từ chối', 'Chờ duyệt'],
+            datasets: [{
+                data: [@approved, @rejected, @pending],
+                backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '70%',
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>

@@ -1,0 +1,218 @@
+@model IEnumerable<SourceCode.Models.TinTuyenDung>
+@{
+    ViewData["Title"] = "Phê duyệt tin tuyển dụng";
+}
+
+<div class="wg-dash container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="wg-title mb-0">Phê duyệt tin tuyển dụng</h2>
+        <span class="text-muted small">Chờ duyệt: <strong class="text-warning">@Model.Count()</strong> tin</span>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="wg-alert wg-alert-green mb-3">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="wg-alert wg-alert-red mb-3">
+            <i class="bi bi-x-circle me-2"></i>@TempData["Error"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="wg-card card p-5 text-center text-muted">
+            <i class="bi bi-check2-all fs-1 d-block mb-2 text-success"></i>
+            <p class="mb-0">Không có tin nào chờ duyệt</p>
+        </div>
+    }
+    else
+    {
+        <div class="wg-card card p-0">
+            <table class="table wg-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Vị trí tuyển dụng</th>
+                        <th>Mã doanh nghiệp</th>
+                        <th>Địa điểm</th>
+                        <th>Mức lương</th>
+                        <th>Số lượng</th>
+                        <th>Hạn nộp</th>
+                        <th>Ngày đăng</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var job in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold small">@job.sViTriCV</div>
+                                @if (!string.IsNullOrEmpty(job.tMoTaCV))
+                                {
+                                    <div class="text-muted" style="font-size:11px;max-width:200px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
+                                        @job.tMoTaCV
+                                    </div>
+                                }
+                            </td>
+                            <td class="small text-muted">@job.FK_sMaDN</td>
+                            <td class="small text-muted">@job.sDiaDiem</td>
+                            <td class="small">
+                                @if (job.fMucLuong > 0)
+                                {
+                                    <span class="fw-semibold text-success">@job.fMucLuong.ToString("N0") đ</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Thỏa thuận</span>
+                                }
+                            </td>
+                            <td class="small text-center">@(job.iSoLuong?.ToString() ?? "—")</td>
+                            <td class="small @(job.dHanNop < DateTime.Now ? "text-danger" : "text-muted")">
+                                @job.dHanNop.ToString("dd/MM/yyyy")
+                            </td>
+                            <td class="small text-muted">@job.dNgayDang.ToString("dd/MM/yyyy")</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a asp-action="ApproveJob" asp-route-id="@job.PK_sMaTin"
+                                       class="wg-btn wg-btn-green"
+                                       onclick="return confirm('Duyệt tin: @job.sViTriCV?')">
+                                        <i class="bi bi-check-lg"></i> Duyệt
+                                    </a>
+                                    <button class="wg-btn wg-btn-red"
+                                            onclick="openReject('@job.PK_sMaTin', '@job.sViTriCV')">
+                                        <i class="bi bi-x-lg"></i> Từ chối
+                                    </button>
+                                    <button class="wg-btn wg-btn-gray"
+                                            onclick="openDetail('@job.PK_sMaTin')">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        @* Detail row (hidden) *@
+                        <tr id="detail-@job.PK_sMaTin" style="display:none;background:#f9fafb;">
+                            <td colspan="8" class="p-3">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="small text-muted mb-1">Mô tả công việc</div>
+                                        <div class="small">@(job.tMoTaCV ?? "—")</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="small text-muted mb-1">Yêu cầu chuyên môn</div>
+                                        <div class="small">@(job.sYeuCauChuyenMon ?? "—")</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@* Reject modal *@
+<div id="rejectOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:14px;padding:28px;width:440px;max-width:90vw;">
+        <h6 style="font-weight:600;margin-bottom:4px;">Từ chối tin tuyển dụng</h6>
+        <p id="rejectJobName" style="font-size:13px;color:#6b7280;margin-bottom:16px;"></p>
+        <label style="font-size:13px;font-weight:500;display:block;margin-bottom:6px;">Lý do từ chối</label>
+        <textarea id="rejectNote" rows="3"
+            style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:10px;font-size:13px;resize:none;outline:none;"
+            placeholder="Nhập lý do từ chối..."></textarea>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+            <button onclick="closeReject()"
+                style="padding:7px 18px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:13px;cursor:pointer;">
+                Hủy
+            </button>
+            <button onclick="submitReject()"
+                style="padding:7px 18px;border-radius:8px;border:none;background:#dc2626;color:#fff;font-size:13px;font-weight:500;cursor:pointer;">
+                Xác nhận từ chối
+            </button>
+        </div>
+    </div>
+</div>
+
+<form id="rejectForm" method="post" asp-action="RejectJob">
+    <input type="hidden" name="id" id="rejectId" />
+    <input type="hidden" name="ghiChu" id="rejectGhiChu" />
+</form>
+
+<style>
+    .wg-dash { background: #f3f4f6; min-height: 100vh; }
+    .wg-title { font-size: 1.3rem; font-weight: 600; color: #111827; }
+
+    .wg-card {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        background: #fff;
+        box-shadow: none !important;
+        overflow: hidden;
+    }
+
+    .wg-table { font-size: 13px; }
+    .wg-table thead tr { background: #f9fafb; }
+    .wg-table thead th {
+        font-size: 12px; font-weight: 600; color: #6b7280;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 16px;
+        text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    .wg-table tbody td {
+        padding: 13px 16px;
+        border-bottom: 1px solid #f3f4f6;
+        vertical-align: middle;
+        color: #111827;
+    }
+    .wg-table tbody tr:last-child td { border-bottom: none; }
+    .wg-table tbody tr:hover { background: #fafafa; }
+
+    .wg-btn {
+        font-size: 12px; font-weight: 500;
+        padding: 5px 12px; border-radius: 8px;
+        text-decoration: none; border: none; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 4px;
+        transition: opacity 0.15s;
+    }
+    .wg-btn:hover { opacity: 0.8; }
+    .wg-btn-green { background: #f0fdf4; color: #15803d; }
+    .wg-btn-red   { background: #fef2f2; color: #b91c1c; }
+    .wg-btn-gray  { background: #f3f4f6; color: #6b7280; }
+
+    .wg-alert {
+        padding: 10px 16px; border-radius: 10px;
+        font-size: 13px; font-weight: 500;
+    }
+    .wg-alert-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .wg-alert-red   { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+</style>
+
+<script>
+    function openDetail(id) {
+        const row = document.getElementById('detail-' + id);
+        row.style.display = row.style.display === 'none' ? '' : 'none';
+    }
+
+    let currentRejectId = '';
+    function openReject(id, name) {
+        currentRejectId = id;
+        document.getElementById('rejectJobName').textContent = name;
+        document.getElementById('rejectNote').value = '';
+        document.getElementById('rejectOverlay').style.display = 'flex';
+    }
+    function closeReject() {
+        document.getElementById('rejectOverlay').style.display = 'none';
+    }
+    function submitReject() {
+        const note = document.getElementById('rejectNote').value.trim();
+        if (!note) { alert('Vui lòng nhập lý do từ chối'); return; }
+        document.getElementById('rejectId').value = currentRejectId;
+        document.getElementById('rejectGhiChu').value = note;
+        document.getElementById('rejectForm').submit();
+    }
+</script>

@@ -33,11 +33,10 @@ namespace SourceCode.Controllers
         {
             var businessId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(businessId)) return RedirectToAction("Login", "Account");
-
             job.PK_sMaTin = "TT" + DateTime.Now.Ticks.ToString().Substring(10);
             job.FK_sMaDN = businessId;
             job.dNgayDang = DateTime.Now;
-            job.sTrangThaiTin = "Approved";
+            job.sTrangThaiTin = "Chờ duyệt";
 
             if (string.IsNullOrEmpty(job.sDiaDiem)) job.sDiaDiem = "Toàn quốc";
             if (string.IsNullOrEmpty(job.sYeuCauChuyenMon)) job.sYeuCauChuyenMon = "Trao đổi khi phỏng vấn";
