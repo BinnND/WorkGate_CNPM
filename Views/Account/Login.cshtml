@@ -1,9 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Đăng Nhập";
 }
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 <style>
     body {
         background-color: #f8f9fa;
@@ -28,7 +26,7 @@
         background-color: #fff;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    /* Style cho phần Tab Đăng Nhập / Đăng Ký */
+    
     .auth-tabs {
         display: flex;
         border-bottom: 1px solid #e2e8f0;
@@ -53,7 +51,6 @@
             border-left: 1px solid #e2e8f0;
         }
     
-    /* Chỉnh sửa ô input có icon */
     .input-group-text {
         background-color: white;
         border-right: none;
@@ -64,8 +61,7 @@
         border-left: none;
     }
 
-        .form-control.with-icon-left:focus,
-        .form-control.with-icon-right:focus {
+        .form-control.with-icon-left:focus {
             box-shadow: none;
             border-color: #ced4da;
         }
@@ -80,7 +76,6 @@
             border-color: #86b7fe;
         }
     
-    /* Nút bấm */
     .btn-primary-custom {
         background-color: #3182ce;
         border-color: #3182ce;
@@ -92,20 +87,19 @@
             background-color: #2b6cb0;
         }
 
-    .btn-outline-custom {
-        color: #3182ce;
-        border: 1px solid #e2e8f0;
-        font-weight: 600;
-    }
-
-        .btn-outline-custom:hover {
-            background-color: #f7fafc;
-        }
-    
-    /* Dấu sao đổi mật khẩu (eye toggle) */
     .cursor-pointer {
         cursor: pointer;
     }
+    
+    .forgot-password-link {
+        color: #3182ce;
+        text-decoration: none;
+    }
+
+        .forgot-password-link:hover {
+            text-decoration: underline;
+            color: #2b6cb0;
+        }
 </style>
 
 <div class="workgate-container">
@@ -120,12 +114,12 @@
         <div class="card-body p-4">
             @if (TempData["Success"] != null)
             {
-                <div class="alert alert-success p-2 mb-3 text-center">@TempData["Success"]</div>
+                <div class="alert alert-success p-2 mb-3 text-center small">@TempData["Success"]</div>
             }
 
             @if (ViewBag.Error != null)
             {
-                <div class="alert alert-danger p-2 mb-3 text-center">@ViewBag.Error</div>
+                <div class="alert alert-danger p-2 mb-3 text-center small">@ViewBag.Error</div>
             }
 
             <form asp-action="Login" method="post">
@@ -146,10 +140,12 @@
                             <i class="fas fa-eye"></i>
                         </span>
                     </div>
+                    <div class="text-end mt-2">
+                        <a href="@Url.Action("ForgotPassword", "Account")" class="small forgot-password-link">Quên mật khẩu?</a>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary-custom w-100 mb-2 py-2">Đăng Nhập</button>
-                <a href="@Url.Action("Register", "Account")" class="btn btn-outline-custom w-100 py-2 d-block text-center text-decoration-none">Đăng Ký</a>
+                <button type="submit" class="btn btn-primary-custom w-100 py-2">Đăng Nhập</button>
             </form>
         </div>
     </div>

@@ -1,0 +1,78 @@
+﻿@model SourceCode.Models.TinTuyenDung
+
+@{
+    ViewData["Title"] = "Sửa Tin Tuyển Dụng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="text-primary fw-bold mb-0">
+                        <i class="fas fa-edit me-2"></i>Chỉnh sửa tin: @Model.sViTriCV
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <form asp-controller="Job" asp-action="EditJob" method="post">
+                        <input type="hidden" asp-for="PK_sMaTin" />
+                        <input type="hidden" asp-for="FK_sMaDN" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-uppercase">Vị trí công việc</label>
+                            <input asp-for="sViTriCV" class="form-control" />
+                            <span asp-validation-for="sViTriCV" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase">Số lượng tuyển</label>
+                                <input asp-for="iSoLuong" type="number" class="form-control" />
+                                <span asp-validation-for="iSoLuong" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase">Hạn nộp hồ sơ</label>
+                                <input asp-for="dHanNop" type="date" class="form-control"
+                                       value="@Model.dHanNop.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="dHanNop" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-uppercase">Địa điểm</label>
+                            <input asp-for="sDiaDiem" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-uppercase">Mô tả công việc</label>
+                            <textarea asp-for="tMoTaCV" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="tMoTaCV" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-uppercase">Yêu cầu chuyên môn</label>
+                            <textarea asp-for="sYeuCauChuyenMon" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="sYeuCauChuyenMon" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase">Mức lương</label>
+                            <input asp-for="fMucLuong" class="form-control" />
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                            <a asp-action="Index" class="btn btn-light px-4">Hủy</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                Lưu thay đổi & Đợi duyệt
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

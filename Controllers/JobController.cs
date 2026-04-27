@@ -16,15 +16,6 @@ namespace SourceCode.Controllers
             _context = context;
         }
 
-       /* public IActionResult Index()
-        {
-            var jobs = _context.TinTuyenDungs
-                .Where(j => j.sTrangThaiTin == "Approved")
-                .ToList();
-
-            return View(jobs);
-        }*/
-
         public IActionResult Create() => View();
 
         [HttpPost]
@@ -155,6 +146,71 @@ namespace SourceCode.Controllers
                 .ToListAsync();
 
             return View(jobs);
+        }
+        [HttpGet]
+        public async Task<IActionResult> EditJob(string id) 
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var job = await _context.TinTuyenDungs.FindAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var dn = await _context.Doanhnghieps.FirstOrDefaultAsync(d => d.FK_sUserID == userId);
+
+            if (job == null || job.FK_sMaDN != dn?.PK_sMaDN)
+            {
+                return NotFound(); 
+            }
+
+            return View(job); 
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditJob(TinTuyenDung model)
+        {
+            // Loại bỏ kiểm tra các trường không có trong form để tránh IsValid = false
+            ModelState.Remove("FK_sMaDN");
+            ModelState.Remove("sTrangThaiTin");
+
+            // Kiểm tra thời gian (MS_03)
+            if (model.dHanNop < DateTime.Now)
+            {
+                ModelState.AddModelError("dHanNop", "Hạn nộp hồ sơ không được nhỏ hơn ngày hiện tại.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var jobInDb = await _context.TinTuyenDungs.FindAsync(model.PK_sMaTin);
+                    if (jobInDb != null)
+                    {
+                        // Cập nhật dữ liệu từ form
+                        jobInDb.sViTriCV = model.sViTriCV;
+                        jobInDb.tMoTaCV = model.tMoTaCV;
+                        jobInDb.sYeuCauChuyenMon = model.sYeuCauChuyenMon; // Cập nhật thêm trường này
+                        jobInDb.iSoLuong = model.iSoLuong;
+                        jobInDb.fMucLuong = model.fMucLuong;
+                        jobInDb.sDiaDiem = model.sDiaDiem;
+                        jobInDb.dHanNop = model.dHanNop;
+
+                        // THIẾT LẬP TRẠNG THÁI VÀ NGÀY CẬP NHẬT
+                        jobInDb.sTrangThaiTin = "Chờ duyệt";
+                        // jobInDb.dNgayCapNhat = DateTime.Now; // Nếu model của bạn có trường này
+
+                        _context.Update(jobInDb);
+                        await _context.SaveChangesAsync();
+
+                        TempData["Success"] = "Cập nhật thành công (MS_Success)";
+                        return RedirectToAction("Index"); // Quay về trang quản lý
+                    }
+                }
+                catch (Exception)
+                {
+                    ModelState.AddModelError("", "Lỗi hệ thống khi cập nhật (MS_05)");
+                }
+            }
+            // Nếu có lỗi, trả về View kèm thông báo lỗi cụ thể
+            return View(model);
         }
     }
 

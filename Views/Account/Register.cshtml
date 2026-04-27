@@ -1,188 +1,236 @@
-﻿@{
+@{
     ViewData["Title"] = "Đăng Ký";
+    string selectedRole = ViewBag.Role ?? "Student";
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-    body {
-        background-color: #f8f9fa; /* Màu nền xám nhạt giúp form nổi bật */
-    }
+    body { background-color: #f3f4f6; }
 
-    .workgate-container {
-        max-width: 450px;
-        margin: 50px auto;
-    }
+    .wg-container { max-width: 520px; margin: 40px auto; padding: 0 16px; }
 
-    .brand-title {
-        color: #2c5282; /* Màu xanh đậm của WorkGate */
-        font-weight: 700;
-        font-size: 32px;
-        text-align: center;
-        margin-bottom: 20px;
-    }
+    .wg-brand { color: #1e3a5f; font-weight: 700; font-size: 28px; text-align: center; margin-bottom: 20px; }
 
-    .custom-card {
-        border: 1px solid #e2e8f0;
-        border-radius: 4px;
-        background-color: #fff;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    /* Style cho phần Tab Đăng Nhập / Đăng Ký */
-    .auth-tabs {
-        display: flex;
-        border-bottom: 1px solid #e2e8f0;
-    }
+    .wg-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
-    .auth-tab {
-        flex: 1;
-        text-align: center;
-        padding: 12px 0;
-        font-weight: 600;
-        text-decoration: none;
-        color: #4a5568;
-        background-color: #f7fafc;
-    }
+    .wg-tabs { display: flex; border-bottom: 1px solid #e5e7eb; }
+    .wg-tab { flex: 1; text-align: center; padding: 13px 0; font-weight: 600; font-size: 14px; text-decoration: none; color: #6b7280; background: #f9fafb; transition: all 0.15s; }
+    .wg-tab.active { background: #2563eb; color: #fff; }
+    .wg-tab:not(.active) { border-right: 1px solid #e5e7eb; }
+    .wg-tab:not(.active):hover { background: #f3f4f6; color: #111827; }
 
-        .auth-tab.active {
-            background-color: #3182ce;
-            color: white;
-        }
+    .wg-body { padding: 24px; }
 
-        .auth-tab:not(.active) {
-            border-right: 1px solid #e2e8f0;
-        }
-    
-    /* Chỉnh sửa ô input có icon */
-    .input-group-text {
-        background-color: white;
-        border-right: none;
-        color: #a0aec0;
-    }
+    /* Role toggle */
+    .role-toggle { display: flex; gap: 10px; margin-bottom: 20px; }
+    .role-btn { flex: 1; padding: 10px; border: 1.5px solid #e5e7eb; border-radius: 10px; background: #fff; font-size: 13px; font-weight: 500; color: #6b7280; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; }
+    .role-btn:hover { border-color: #93c5fd; color: #2563eb; }
+    .role-btn.active { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
 
-    .form-control.with-icon-left {
-        border-left: none;
-    }
+    /* Form fields */
+    .wg-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; display: block; }
+    .wg-input-group { display: flex; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 14px; transition: border-color 0.15s; }
+    .wg-input-group:focus-within { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .wg-input-icon { padding: 0 12px; display: flex; align-items: center; color: #9ca3af; background: #f9fafb; border-right: 1px solid #e5e7eb; font-size: 13px; }
+    .wg-input { flex: 1; border: none; outline: none; padding: 10px 12px; font-size: 13px; color: #111827; background: #fff; }
+    .wg-input::placeholder { color: #9ca3af; }
+    .wg-eye { padding: 0 12px; display: flex; align-items: center; color: #9ca3af; background: #fff; cursor: pointer; border-left: 1px solid #e5e7eb; }
+    .wg-eye:hover { color: #2563eb; }
 
-        .form-control.with-icon-left:focus,
-        .form-control.with-icon-right:focus {
-            box-shadow: none;
-            border-color: #ced4da;
-        }
+    .wg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    .input-group:focus-within {
-        box-shadow: 0 0 0 0.25rem rgba(49, 130, 206, 0.25);
-        border-radius: 0.375rem;
-    }
+    .wg-divider { font-size: 12px; font-weight: 600; color: #9ca3af; text-align: center; margin: 4px 0 14px; text-transform: uppercase; letter-spacing: 0.05em; }
 
-        .input-group:focus-within .input-group-text,
-        .input-group:focus-within .form-control {
-            border-color: #86b7fe;
-        }
-    
-    /* Nút bấm */
-    .btn-primary-custom {
-        background-color: #3182ce;
-        border-color: #3182ce;
-        color: white;
-        font-weight: 600;
-    }
+    .wg-btn { width: 100%; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s; margin-bottom: 10px; }
+    .wg-btn-primary { background: #2563eb; color: #fff; }
+    .wg-btn-primary:hover { background: #1d4ed8; }
+    .wg-btn-outline { background: #fff; color: #2563eb; border: 1.5px solid #e5e7eb; }
+    .wg-btn-outline:hover { background: #f9fafb; }
 
-        .btn-primary-custom:hover {
-            background-color: #2b6cb0;
-        }
+    .wg-alert { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
-    .btn-outline-custom {
-        color: #3182ce;
-        border: 1px solid #e2e8f0;
-        font-weight: 600;
-    }
-
-        .btn-outline-custom:hover {
-            background-color: #f7fafc;
-        }
-    
-    /* Dấu sao đổi mật khẩu (eye toggle) */
-    .cursor-pointer {
-        cursor: pointer;
-    }
+    .wg-note { font-size: 12px; color: #6b7280; background: #f9fafb; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; border: 1px solid #e5e7eb; }
+    .wg-note i { color: #2563eb; margin-right: 6px; }
 </style>
 
-<div class="workgate-container">
-    <div class="brand-title">WorkGate</div>
+<div class="wg-container">
+    <div class="wg-brand">WorkGate</div>
 
-    <div class="custom-card">
-        <div class="auth-tabs">
-            <a href="@Url.Action("Login", "Account")" class="auth-tab">Đăng Nhập</a>
-            <div class="auth-tab active">Đăng Ký</div>
+    <div class="wg-card">
+        <div class="wg-tabs">
+            <a href="@Url.Action("Login", "Account")" class="wg-tab">Đăng Nhập</a>
+            <div class="wg-tab active">Đăng Ký</div>
         </div>
 
-        <div class="card-body p-4">
+        <div class="wg-body">
             @if (ViewBag.Error != null)
             {
-                <div class="alert alert-danger p-2 mb-3 text-center">@ViewBag.Error</div>
+                <div class="wg-alert">
+                    <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                </div>
             }
 
-            <form asp-action="Register" method="post">
-                <div class="mb-3">
-                    <label class="form-label fw-bold text-dark">Họ và tên</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                        <input type="text" name="FullName" class="form-control with-icon-left" placeholder="Họ và tên" required />
+            @* Role toggle *@
+            <div class="role-toggle">
+                <button type="button" class="role-btn @(selectedRole == "Student" ? "active" : "")"
+                        id="btnStudent" onclick="switchRole('Student')">
+                    <i class="fas fa-graduation-cap"></i> Sinh viên
+                </button>
+                <button type="button" class="role-btn @(selectedRole == "Company" ? "active" : "")"
+                        id="btnCompany" onclick="switchRole('Company')">
+                    <i class="fas fa-building"></i> Doanh nghiệp
+                </button>
+            </div>
+
+            <form asp-action="Register" method="post" id="registerForm">
+                <input type="hidden" name="Role" id="roleInput" value="@selectedRole" />
+
+                @* ── Thông tin tài khoản chung ── *@
+                <div class="wg-divider">Thông tin tài khoản</div>
+
+                <label class="wg-label">Email <span style="color:#ef4444">*</span></label>
+                <div class="wg-input-group">
+                    <div class="wg-input-icon"><i class="fas fa-envelope"></i></div>
+                    <input type="email" name="Email" class="wg-input" placeholder="example@email.com" required />
+                </div>
+
+                <label class="wg-label">Mật khẩu <span style="color:#ef4444">*</span></label>
+                <div class="wg-input-group">
+                    <div class="wg-input-icon"><i class="fas fa-lock"></i></div>
+                    <input type="password" name="Password" id="passwordInput" class="wg-input" placeholder="Ít nhất 6 ký tự" required />
+                    <div class="wg-eye" onclick="togglePwd()"><i class="fas fa-eye" id="eyeIcon"></i></div>
+                </div>
+
+                @* ── Sinh viên ── *@
+                <div id="studentFields" style="display:@(selectedRole == "Student" ? "block" : "none")">
+                    <div class="wg-divider">Thông tin sinh viên</div>
+
+                    <label class="wg-label">Họ và tên <span style="color:#ef4444">*</span></label>
+                    <div class="wg-input-group">
+                        <div class="wg-input-icon"><i class="fas fa-user"></i></div>
+                        <input type="text" name="HoTen" class="wg-input" placeholder="Nguyễn Văn A" />
+                    </div>
+
+                    <div class="wg-row">
+                        <div>
+                            <label class="wg-label">Mã sinh viên <span style="color:#ef4444">*</span></label>
+                            <div class="wg-input-group">
+                                <div class="wg-input-icon"><i class="fas fa-id-card"></i></div>
+                                <input type="text" name="MaSV" class="wg-input" placeholder="SV001" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="wg-label">Số điện thoại</label>
+                            <div class="wg-input-group">
+                                <div class="wg-input-icon"><i class="fas fa-phone"></i></div>
+                                <input type="text" name="SDT" class="wg-input" placeholder="09xxxxxxxx" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="wg-label">Lớp <span style="color:#ef4444">*</span></label>
+                    <div class="wg-input-group">
+                        <div class="wg-input-icon"><i class="fas fa-users"></i></div>
+                        <input type="text" name="Lop" class="wg-input" placeholder="CNTT01" />
+                    </div>
+
+                    <div class="wg-row">
+                        <div>
+                            <label class="wg-label">Ngành học <span style="color:#ef4444">*</span></label>
+                            <div class="wg-input-group">
+                                <div class="wg-input-icon"><i class="fas fa-book"></i></div>
+                                <input type="text" name="NganhHoc" class="wg-input" placeholder="Công nghệ thông tin" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="wg-label">Khóa học <span style="color:#ef4444">*</span></label>
+                            <div class="wg-input-group">
+                                <div class="wg-input-icon"><i class="fas fa-calendar"></i></div>
+                                <input type="text" name="KhoaHoc" class="wg-input" placeholder="2021-2025" />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold text-dark">Email</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                        <input type="email" name="Email" class="form-control with-icon-left" placeholder="Email" required />
+                @* ── Doanh nghiệp ── *@
+                <div id="companyFields" style="display:@(selectedRole == "Company" ? "block" : "none")">
+                    <div class="wg-divider">Thông tin doanh nghiệp</div>
+
+                    <div class="wg-note">
+                        <i class="fas fa-info-circle"></i>
+                        Tài khoản doanh nghiệp sẽ được xét duyệt bởi Admin trước khi kích hoạt.
+                    </div>
+
+                    <label class="wg-label">Tên doanh nghiệp <span style="color:#ef4444">*</span></label>
+                    <div class="wg-input-group">
+                        <div class="wg-input-icon"><i class="fas fa-building"></i></div>
+                        <input type="text" name="TenDN" class="wg-input" placeholder="Công ty ABC" />
+                    </div>
+
+                    <label class="wg-label">Người đại diện <span style="color:#ef4444">*</span></label>
+                    <div class="wg-input-group">
+                        <div class="wg-input-icon"><i class="fas fa-user-tie"></i></div>
+                        <input type="text" name="NguoiDaiDien" class="wg-input" placeholder="Nguyễn Văn B" />
+                    </div>
+
+                    <label class="wg-label">Địa chỉ <span style="color:#ef4444">*</span></label>
+                    <div class="wg-input-group">
+                        <div class="wg-input-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <input type="text" name="DiaChi" class="wg-input" placeholder="Số 1 Đường ABC, Hà Nội" />
+                    </div>
+
+                    <div class="wg-row">
+                        <div>
+                            <label class="wg-label">Mã số thuế <span style="color:#ef4444">*</span></label>
+                            <div class="wg-input-group">
+                                <div class="wg-input-icon"><i class="fas fa-file-invoice"></i></div>
+                                <input type="text" name="MaSoThue" class="wg-input" placeholder="0123456789" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="wg-label">Giấy phép KD <span style="color:#ef4444">*</span></label>
+                            <div class="wg-input-group">
+                                <div class="wg-input-icon"><i class="fas fa-certificate"></i></div>
+                                <input type="text" name="GiayPhepKD" class="wg-input" placeholder="GPKD-2024" />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold text-dark">Mật khẩu</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                        <input type="password" name="Password" id="passwordInput" class="form-control with-icon-left border-end-0" placeholder="••••••••" required />
-                        <span class="input-group-text bg-white border-left-0 cursor-pointer" id="togglePassword">
-                            <i class="fas fa-eye"></i>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold text-dark d-block">Loại tài khoản</label>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="Role" id="roleStudent" value="Student" checked>
-                        <label class="form-check-label" for="roleStudent">Sinh viên</label>
-                    </div>
-                    <div class="form-check form-check-inline ms-4">
-                        <input class="form-check-input" type="radio" name="Role" id="roleCompany" value="Company">
-                        <label class="form-check-label" for="roleCompany">Doanh nghiệp</label>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary-custom w-100 mb-2 py-2">Đăng Ký</button>
-                <a href="@Url.Action("Login", "Account")" class="btn btn-outline-custom w-100 py-2 d-block text-center text-decoration-none">Đăng Nhập</a>
+                <button type="submit" class="wg-btn wg-btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Đăng Ký
+                </button>
+                <a href="@Url.Action("Login", "Account")" class="wg-btn wg-btn-outline d-block text-center text-decoration-none">
+                    Đã có tài khoản? Đăng Nhập
+                </a>
             </form>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        const togglePassword = document.querySelector('#togglePassword');
-        const password = document.querySelector('#passwordInput');
-        const eyeIcon = togglePassword.querySelector('i');
+<script>
+    function switchRole(role) {
+        document.getElementById('roleInput').value = role;
+        document.getElementById('studentFields').style.display = role === 'Student' ? 'block' : 'none';
+        document.getElementById('companyFields').style.display = role === 'Company' ? 'block' : 'none';
+        document.getElementById('btnStudent').classList.toggle('active', role === 'Student');
+        document.getElementById('btnCompany').classList.toggle('active', role === 'Company');
+    }
 
-        togglePassword.addEventListener('click', function (e) {
-            // Đổi type của input
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            // Đổi icon mắt
-            eyeIcon.classList.toggle('fa-eye');
-            eyeIcon.classList.toggle('fa-eye-slash');
-        });
-    </script>
+    function togglePwd() {
+        const input = document.getElementById('passwordInput');
+        const icon = document.getElementById('eyeIcon');
+        input.type = input.type === 'password' ? 'text' : 'password';
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    }
+
+    // Giữ role khi có lỗi server trả về
+    window.onload = () => {
+        const role = document.getElementById('roleInput').value;
+        switchRole(role);
+    };
+</script>
 }

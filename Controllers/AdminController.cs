@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SourceCode.Data;
 using SourceCode.Models;
-using System.Drawing;
 using ClosedXML.Excel;
 
 public class AdminController : Controller
@@ -13,95 +12,215 @@ public class AdminController : Controller
     {
         _context = context;
     }
-    public IActionResult Users()
-    {
-        return View(_context.Users.ToList());
-    }
-
-    public IActionResult ApproveCompany(int id)
-    {
-        var user = _context.Users.Find(id);
-        user.sTrangThaiTK = "Approved";
-        _context.SaveChanges();
-
-        return RedirectToAction("Users");
-    }
     public async Task<IActionResult> Index()
     {
         var role = HttpContext.Session.GetString("UserRole");
         if (string.IsNullOrEmpty(role) || role.ToLower() != "admin")
-        {
             return RedirectToAction("Login", "Account");
-        }
 
-        ViewBag.TotalJobs = await _context.TinTuyenDungs.CountAsync();
-        ViewBag.TotalStudents = await _context.Users.CountAsync(u => u.sVaiTro == "sinhvien");
+        ViewBag.TotalJobs         = await _context.TinTuyenDungs.CountAsync();
+        ViewBag.TotalStudents     = await _context.Users.CountAsync(u => u.sVaiTro == "sinhvien");
         ViewBag.TotalApplications = await _context.UngTuyens.CountAsync();
-        ViewBag.JobRate = 0;
+        ViewBag.JobRate           = 0;
+        ViewBag.PendingJobsCount  = await _context.TinTuyenDungs.CountAsync(t => t.sTrangThaiTin == "Chờ duyệt");
 
         ViewBag.RecentJobs = await _context.TinTuyenDungs
             .OrderByDescending(j => j.PK_sMaTin)
             .Take(5)
             .ToListAsync() ?? new List<TinTuyenDung>();
+
         ViewBag.TopCompanies = await _context.Doanhnghieps
-                .Where(dn => dn.sTrangThaiDuyet == "Đã duyệt")
-                .Select(dn => new {
-                    dn.sTenDN,
-                    SoTin = _context.TinTuyenDungs.Count(t => t.FK_sMaDN == dn.PK_sMaDN)
-                })
-                .OrderByDescending(x => x.SoTin)
-                .Take(5)
-                .ToListAsync();
+            .Where(dn => dn.sTrangThaiDuyet == "Đã duyệt")
+            .Select(dn => new {
+                dn.sTenDN,
+                SoTin = _context.TinTuyenDungs.Count(t => t.FK_sMaDN == dn.PK_sMaDN)
+            })
+            .OrderByDescending(x => x.SoTin)
+            .Take(5)
+            .ToListAsync();
 
         return View();
     }
-    public IActionResult LockUser(string id)
-    {
-        var user = _context.Users.Find(id);
-        if (user != null)
-        {
-            user.sTrangThaiTK = "locked";
-            _context.SaveChanges();
-        }
-        return RedirectToAction("Users");
-    }
 
-    public IActionResult UnlockUser(string id)
+    public IActionResult Users()
     {
-        var user = _context.Users.Find(id);
-        if (user != null)
-        {
-            user.sTrangThaiTK = "active";
-            _context.SaveChanges();
-        }
-        return RedirectToAction("Users");
+        return View(_context.Users.ToList());
     }
-    public IActionResult ApproveJob(string id)
+    [HttpPost]
+    public async Task<IActionResult> LockUser(string id)
     {
-        var job = _context.TinTuyenDungs.Find(id);
-        if (job != null)
+        // Unit 1: validatePermission
+        var adminRole = HttpContext.Session.GetString("UserRole");
+        if (string.IsNullOrEmpty(adminRole) || adminRole.ToLower() != "admin")
         {
-            job.sTrangThaiTin = "Đã duyệt";
-            _context.SaveChanges();
-            TempData["Success"] = $"Đã duyệt tin: {job.sViTriCV}";
+            TempData["Error"] = "Bạn không có quyền thực hiện chức năng này.";
+            return RedirectToAction("Users");
         }
-        return RedirectToAction("JobsPending");
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                TempData["Error"] = "Không tìm thấy tài khoản.";
+                return RedirectToAction("Users");
+            }
+
+            user.sTrangThaiTK = "locked";
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            TempData["Success"] = $"Đã khóa tài khoản: {user.sHoten}";
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = "Lỗi hệ thống, vui lòng thử lại.";
+        }
+
+        return RedirectToAction("Users");
     }
 
     [HttpPost]
-    public IActionResult RejectJob(string id, string ghiChu)
+    public async Task<IActionResult> UnlockUser(string id)
     {
-        var job = _context.TinTuyenDungs.Find(id);
-        if (job != null)
+        
+        var adminRole = HttpContext.Session.GetString("UserRole");
+        if (string.IsNullOrEmpty(adminRole) || adminRole.ToLower() != "admin")
         {
-            job.sTrangThaiTin = "Từ chối";
-            job.sGhiChuTuChoi = ghiChu;
-            _context.SaveChanges();
-            TempData["Error"] = $"Đã từ chối tin: {job.sViTriCV}";
+            TempData["Error"] = "Bạn không có quyền thực hiện chức năng này.";
+            return RedirectToAction("Users");
         }
-        return RedirectToAction("JobsPending");
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                TempData["Error"] = "Không tìm thấy tài khoản.";
+                return RedirectToAction("Users");
+            }
+
+            user.sTrangThaiTK = "active";
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            TempData["Success"] = $"Đã mở khóa tài khoản: {user.sHoten}";
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = "Lỗi hệ thống, vui lòng thử lại.";
+        }
+
+        return RedirectToAction("Users");
     }
 
+    public async Task<IActionResult> Companies()
+    {
+        var companies = await _context.Doanhnghieps
+            .OrderBy(d => d.sTrangThaiDuyet)
+            .ToListAsync();
+        return View(companies);
+    }
+
+  
+    [HttpPost]
+    public async Task<IActionResult> ApproveCompany(string id)
+    {
+        
+        var adminRole = HttpContext.Session.GetString("UserRole");
+        if (string.IsNullOrEmpty(adminRole) || adminRole.ToLower() != "admin")
+        {
+            TempData["Error"] = "Bạn không có quyền thực hiện chức năng này.";
+            return RedirectToAction("Companies");
+        }
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+           
+            var dn = await _context.Doanhnghieps.FindAsync(id);
+            if (dn == null)
+            {
+                TempData["Error"] = "Không tìm thấy doanh nghiệp.";
+                return RedirectToAction("Companies");
+            }
+
+          
+            dn.sTrangThaiDuyet = "Đã duyệt";
+            dn.dNgayKichHoat   = DateTime.Now;
+
+           
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.PK_sUserID == dn.FK_sUserID);
+            if (user != null)
+                user.sTrangThaiTK = "active";
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+          
+            TempData["Success"] = $"Đã duyệt doanh nghiệp: {dn.sTenDN}";
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = "Lỗi hệ thống, vui lòng thử lại.";
+        }
+
+        return RedirectToAction("Companies");
+    }
+
+   
+    [HttpPost]
+    public async Task<IActionResult> RejectCompany(string id)
+    {
+        
+        var adminRole = HttpContext.Session.GetString("UserRole");
+        if (string.IsNullOrEmpty(adminRole) || adminRole.ToLower() != "admin")
+        {
+            TempData["Info"] = "Bạn không có quyền thực hiện chức năng này.";
+            return RedirectToAction("Companies");
+        }
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+          
+            var dn = await _context.Doanhnghieps.FindAsync(id);
+            if (dn == null)
+            {
+                TempData["Error"] = "Không tìm thấy doanh nghiệp.";
+                return RedirectToAction("Companies");
+            }
+
+           
+            dn.sTrangThaiDuyet = "Từ chối";
+
+          
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.PK_sUserID == dn.FK_sUserID);
+            if (user != null)
+                user.sTrangThaiTK = "locked";
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+           
+            TempData["Error"] = $"Đã từ chối doanh nghiệp: {dn.sTenDN}";
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = "Lỗi hệ thống, vui lòng thử lại.";
+        }
+
+        return RedirectToAction("Companies");
+    }
+
+   
     public IActionResult JobsPending()
     {
         return View(_context.TinTuyenDungs
@@ -109,12 +228,63 @@ public class AdminController : Controller
             .OrderByDescending(j => j.dNgayDang)
             .ToList());
     }
+
+    [HttpPost]
+    public async Task<IActionResult> ApproveJob(string id)
+    {
+        
+        var adminRole = HttpContext.Session.GetString("UserRole");
+        if (string.IsNullOrEmpty(adminRole) || adminRole.ToLower() != "admin")
+        {
+            TempData["Error"] = "Bạn không có quyền thực hiện chức năng này.";
+            return RedirectToAction("JobsPending");
+        }
+
+       
+        var job = await _context.TinTuyenDungs.FindAsync(id);
+        if (job != null)
+        {
+            job.sTrangThaiTin = "Đã duyệt";
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"Đã duyệt tin: {job.sViTriCV}";
+        }
+        else
+        {
+            TempData["Error"] = "Không tìm thấy tin tuyển dụng.";
+        }
+
+        return RedirectToAction("JobsPending");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RejectJob(string id, string ghiChu)
+    {
+       
+        var adminRole = HttpContext.Session.GetString("UserRole");
+        if (string.IsNullOrEmpty(adminRole) || adminRole.ToLower() != "admin")
+        {
+            TempData["Error"] = "Bạn không có quyền thực hiện chức năng này.";
+            return RedirectToAction("JobsPending");
+        }
+
+      
+        var job = await _context.TinTuyenDungs.FindAsync(id);
+        if (job != null)
+        {
+            job.sTrangThaiTin  = "Từ chối";
+            job.sGhiChuTuChoi  = ghiChu;
+            await _context.SaveChangesAsync();
+            TempData["Error"] = $"Đã từ chối tin: {job.sViTriCV}";
+        }
+
+        return RedirectToAction("JobsPending");
+    }
+
+   
     public async Task<IActionResult> Reports()
     {
-        var now = DateTime.Now;
-        var year = now.Year;
+        var year = DateTime.Now.Year;
 
-        // Số tin tuyển dụng theo tháng
         ViewBag.JobsByMonth = await _context.TinTuyenDungs
             .Where(j => j.dNgayDang.Year == year)
             .GroupBy(j => j.dNgayDang.Month)
@@ -122,7 +292,6 @@ public class AdminController : Controller
             .OrderBy(x => x.Month)
             .ToListAsync();
 
-        // Số đơn ứng tuyển theo tháng
         ViewBag.AppsByMonth = await _context.UngTuyens
             .Where(u => u.dNgayUngTuyen.Year == year)
             .GroupBy(u => u.dNgayUngTuyen.Month)
@@ -130,13 +299,11 @@ public class AdminController : Controller
             .OrderBy(x => x.Month)
             .ToListAsync();
 
-        // Tỷ lệ duyệt / từ chối
-        ViewBag.TotalJobs = await _context.TinTuyenDungs.CountAsync();
+        ViewBag.TotalJobs    = await _context.TinTuyenDungs.CountAsync();
         ViewBag.ApprovedJobs = await _context.TinTuyenDungs.CountAsync(j => j.sTrangThaiTin == "Đã duyệt");
         ViewBag.RejectedJobs = await _context.TinTuyenDungs.CountAsync(j => j.sTrangThaiTin == "Từ chối");
-        ViewBag.PendingJobs = await _context.TinTuyenDungs.CountAsync(j => j.sTrangThaiTin == "Chờ duyệt");
+        ViewBag.PendingJobs  = await _context.TinTuyenDungs.CountAsync(j => j.sTrangThaiTin == "Chờ duyệt");
 
-        // Top doanh nghiệp
         ViewBag.TopCompanies = await _context.Doanhnghieps
             .Select(dn => new {
                 dn.sTenDN,
@@ -149,17 +316,16 @@ public class AdminController : Controller
         ViewBag.Year = year;
         return View();
     }
+
     public async Task<IActionResult> ExportReport()
     {
         var year = DateTime.Now.Year;
 
         var jobs = await _context.TinTuyenDungs
-            .Where(j => j.dNgayDang.Year == year)
-            .ToListAsync();
+            .Where(j => j.dNgayDang.Year == year).ToListAsync();
 
         var apps = await _context.UngTuyens
-            .Where(u => u.dNgayUngTuyen.Year == year)
-            .ToListAsync();
+            .Where(u => u.dNgayUngTuyen.Year == year).ToListAsync();
 
         var topCompanies = await _context.Doanhnghieps
             .Select(dn => new {
@@ -172,22 +338,17 @@ public class AdminController : Controller
 
         using var wb = new XLWorkbook();
 
-        // ── Sheet 1: Tin tuyển dụng ──
         var ws1 = wb.Worksheets.Add("Tin tuyển dụng");
         ws1.Cell(1, 1).Value = $"BÁO CÁO TIN TUYỂN DỤNG NĂM {year}";
         ws1.Range(1, 1, 1, 7).Merge().Style
             .Font.SetBold(true).Font.SetFontSize(14)
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
-
         string[] h1 = { "Mã tin", "Vị trí", "Địa điểm", "Mức lương", "Số lượng", "Trạng thái", "Ngày đăng" };
         for (int i = 0; i < h1.Length; i++)
-        {
             ws1.Cell(2, i + 1).Value = h1[i];
-            ws1.Cell(2, i + 1).Style.Font.SetBold(true)
-                .Fill.SetBackgroundColor(XLColor.FromHtml("#2563eb"))
-                .Font.SetFontColor(XLColor.White);
-        }
-
+        ws1.Row(2).Style.Font.SetBold(true)
+            .Fill.SetBackgroundColor(XLColor.FromHtml("#2563eb"))
+            .Font.SetFontColor(XLColor.White);
         int row1 = 3;
         foreach (var j in jobs)
         {
@@ -204,22 +365,17 @@ public class AdminController : Controller
         }
         ws1.Columns().AdjustToContents();
 
-        // ── Sheet 2: Đơn ứng tuyển ──
         var ws2 = wb.Worksheets.Add("Đơn ứng tuyển");
         ws2.Cell(1, 1).Value = $"BÁO CÁO ĐƠN ỨNG TUYỂN NĂM {year}";
         ws2.Range(1, 1, 1, 4).Merge().Style
             .Font.SetBold(true).Font.SetFontSize(14)
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
-
         string[] h2 = { "Mã đơn", "Mã tin", "Ngày ứng tuyển", "Trạng thái" };
         for (int i = 0; i < h2.Length; i++)
-        {
             ws2.Cell(2, i + 1).Value = h2[i];
-            ws2.Cell(2, i + 1).Style.Font.SetBold(true)
-                .Fill.SetBackgroundColor(XLColor.FromHtml("#7c3aed"))
-                .Font.SetFontColor(XLColor.White);
-        }
-
+        ws2.Row(2).Style.Font.SetBold(true)
+            .Fill.SetBackgroundColor(XLColor.FromHtml("#7c3aed"))
+            .Font.SetFontColor(XLColor.White);
         int row2 = 3;
         foreach (var a in apps)
         {
@@ -233,19 +389,16 @@ public class AdminController : Controller
         }
         ws2.Columns().AdjustToContents();
 
-        // ── Sheet 3: Top doanh nghiệp ──
         var ws3 = wb.Worksheets.Add("Top doanh nghiệp");
         ws3.Cell(1, 1).Value = "TOP DOANH NGHIỆP ĐĂNG TIN NHIỀU NHẤT";
         ws3.Range(1, 1, 1, 2).Merge().Style
             .Font.SetBold(true).Font.SetFontSize(14)
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
-
         ws3.Cell(2, 1).Value = "Tên doanh nghiệp";
         ws3.Cell(2, 2).Value = "Số tin tuyển dụng";
-        ws3.Range(2, 1, 2, 2).Style.Font.SetBold(true)
+        ws3.Row(2).Style.Font.SetBold(true)
             .Fill.SetBackgroundColor(XLColor.FromHtml("#0f766e"))
             .Font.SetFontColor(XLColor.White);
-
         int row3 = 3;
         foreach (var c in topCompanies)
         {

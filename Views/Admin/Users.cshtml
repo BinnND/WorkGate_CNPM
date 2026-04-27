@@ -8,7 +8,18 @@
         <h2 class="wg-title mb-0">Quản lý người dùng</h2>
         <span class="text-muted small">Tổng: <strong>@Model.Count()</strong> tài khoản</span>
     </div>
-
+    @if (TempData["Success"] != null)
+    {
+        <div class="wg-alert wg-alert-green mb-3">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="wg-alert wg-alert-red mb-3">
+            <i class="bi bi-x-circle me-2"></i>@TempData["Error"]
+        </div>
+    }
     @* Filter tabs *@
     <div class="wg-tabs mb-3">
         <button class="wg-tab active" onclick="filterTable('all', this)">Tất cả</button>
@@ -81,25 +92,42 @@
                         </td>
                         <td class="small text-muted">@user.dNgayTao.ToString("dd/MM/yyyy")</td>
                         <td class="text-end">
-                            <div class="d-flex gap-2 justify-content-end">
-                                @if (user.sTrangThaiTK?.ToLower() == "locked" || user.sTrangThaiTK?.ToLower() == "banned")
-                                {
-                                    <a asp-action="UnlockUser" asp-route-id="@user.PK_sUserID"
-                                       class="wg-btn wg-btn-green"
-                                       onclick="return confirm('Mở khóa tài khoản này?')">
+                        <div class="d-flex gap-2 justify-content-end">
+                            @if (user.sVaiTro?.ToLower() == "admin")
+                            {
+                                <span class="text-muted small">—</span>
+                            }
+                            else if (user.sVaiTro?.ToLower() == "doanhnghiep"
+                                     && (user.sTrangThaiTK == "Chờ duyệt" || user.sTrangThaiTK == "Từ chối"))
+                            {
+                                <a asp-controller="Admin" asp-action="Companies"
+                                   class="wg-btn wg-btn-blue">
+                                    <i class="bi bi-building-check"></i> Xem duyệt
+                                </a>
+                            }
+                            else if (user.sTrangThaiTK?.ToLower() == "locked"
+                                     || user.sTrangThaiTK?.ToLower() == "banned")
+                            {
+                                <form asp-action="UnlockUser" asp-route-id="@user.PK_sUserID"
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="wg-btn wg-btn-green"
+                                            onclick="return confirm('Mở khóa tài khoản: @user.sHoten?')">
                                         <i class="bi bi-unlock"></i> Mở khóa
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a asp-action="LockUser" asp-route-id="@user.PK_sUserID"
-                                       class="wg-btn wg-btn-red"
-                                       onclick="return confirm('Khóa tài khoản này?')">
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="LockUser" asp-route-id="@user.PK_sUserID"
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="wg-btn wg-btn-red"
+                                            onclick="return confirm('Khóa tài khoản: @user.sHoten?')">
                                         <i class="bi bi-lock"></i> Khóa
-                                    </a>
-                                }
-                            </div>
-                        </td>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </td>
                     </tr>
                 }
             </tbody>
@@ -116,6 +144,9 @@
 </div>
 
 <style>
+    .wg-alert { padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; }
+    .wg-alert-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .wg-alert-red   { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
     .wg-dash { background: #f3f4f6; min-height: 100vh; }
     .wg-title { font-size: 1.3rem; font-weight: 600; color: #111827; }
 
@@ -180,6 +211,7 @@
     .wg-btn:hover { opacity: 0.8; }
     .wg-btn-red   { background: #fef2f2; color: #b91c1c; }
     .wg-btn-green { background: #f0fdf4; color: #15803d; }
+    .wg-btn-blue { background: #eff6ff; color: #1d4ed8; }
 
     .wg-search {
         width: 300px; height: 36px;

@@ -1,0 +1,157 @@
+@model IEnumerable<SourceCode.Models.Doanhnghiep>
+@{
+    ViewData["Title"] = "Phê duyệt doanh nghiệp";
+}
+
+<div class="wg-dash container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="wg-title mb-0">Phê duyệt tài khoản doanh nghiệp</h2>
+        <span class="text-muted small">
+            Chờ duyệt: <strong class="text-warning">@Model.Count(d => d.sTrangThaiDuyet == "Chờ duyệt")</strong>
+        </span>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="wg-alert wg-alert-green mb-3">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="wg-alert wg-alert-red mb-3">
+            <i class="bi bi-x-circle me-2"></i>@TempData["Error"]
+        </div>
+    }
+    @if (TempData["Info"] != null)
+    {
+        <div class="wg-alert wg-alert-info mb-3">
+            <i class="bi bi-slash-circle me-2"></i>@TempData["Info"]
+        </div>
+    }
+
+    @* Filter tabs *@
+    <div class="wg-tabs mb-3">
+        <button class="wg-tab active" onclick="filterTable('all', this)">Tất cả (@Model.Count())</button>
+        <button class="wg-tab" onclick="filterTable('Chờ duyệt', this)">Chờ duyệt (@Model.Count(d => d.sTrangThaiDuyet == "Chờ duyệt"))</button>
+        <button class="wg-tab" onclick="filterTable('Đã duyệt', this)">Đã duyệt (@Model.Count(d => d.sTrangThaiDuyet == "Đã duyệt"))</button>
+        <button class="wg-tab" onclick="filterTable('Từ chối', this)">Từ chối (@Model.Count(d => d.sTrangThaiDuyet == "Từ chối"))</button>
+    </div>
+
+    <div class="wg-card card p-0">
+        <table class="table wg-table mb-0" id="companyTable">
+            <thead>
+                <tr>
+                    <th>Doanh nghiệp</th>
+                    <th>Người đại diện</th>
+                    <th>Địa chỉ</th>
+                    <th>Mã số thuế</th>
+                    <th>Giấy phép KD</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-building fs-1 d-block mb-2"></i>
+                            Không có doanh nghiệp nào
+                        </td>
+                    </tr>
+                }
+                @foreach (var dn in Model)
+                {
+                    var stClass = dn.sTrangThaiDuyet switch {
+                        "Đã duyệt" => "wg-badge-green",
+                        "Từ chối"  => "wg-badge-red",
+                        _          => "wg-badge-yellow"
+                    };
+                    <tr data-status="@dn.sTrangThaiDuyet">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="wg-avatar">@(dn.sTenDN?.Substring(0,1).ToUpper() ?? "?")</div>
+                                <div>
+                                    <div class="fw-semibold small">@dn.sTenDN</div>
+                                    <div style="font-size:11px;color:#9ca3af;">@dn.PK_sMaDN</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="small text-muted">@(dn.sNguoiDaiDien ?? "—")</td>
+                        <td class="small text-muted" 
+                            style="max-width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"
+                            title="@(dn.sDiaChi ?? "")">
+                            @(dn.sDiaChi ?? "—")
+                        </td>                        
+                        <td class="small text-muted">@(dn.FK_sMaSoThue ?? "—")</td>
+                        <td class="small text-muted">@(dn.sGiayPhepKD ?? "—")</td>
+                        <td><span class="wg-badge @stClass">@dn.sTrangThaiDuyet</span></td>
+                        <td class="text-end">
+                            @if (dn.sTrangThaiDuyet == "Chờ duyệt")
+                            {
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <form asp-action="ApproveCompany" asp-route-id="@dn.PK_sMaDN" method="post" class="d-inline">
+                                        <button type="submit" class="wg-btn wg-btn-green"
+                                                onclick="return confirm('Duyệt doanh nghiệp: @dn.sTenDN?')">
+                                            <i class="bi bi-check-lg"></i> Duyệt
+                                        </button>
+                                    </form>
+                                    <form asp-action="RejectCompany" asp-route-id="@dn.PK_sMaDN" method="post" class="d-inline">
+                                        <button type="submit" class="wg-btn wg-btn-red"
+                                                onclick="return confirm('Từ chối doanh nghiệp: @dn.sTenDN?')">
+                                            <i class="bi bi-x-lg"></i> Từ chối
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">Đã xử lý</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .wg-alert-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .wg-dash { background: #f3f4f6; min-height: 100vh; }
+    .wg-title { font-size: 1.3rem; font-weight: 600; color: #111827; }
+    .wg-card { border: 1px solid #e5e7eb !important; border-radius: 12px !important; background: #fff; box-shadow: none !important; overflow: hidden; }
+    .wg-table { font-size: 13px; }
+    .wg-table thead tr { background: #f9fafb; }
+    .wg-table thead th { font-size: 12px; font-weight: 600; color: #6b7280; border-bottom: 1px solid #e5e7eb; padding: 12px 16px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .wg-table tbody td { padding: 13px 16px; border-bottom: 1px solid #f3f4f6; color: #111827; vertical-align: middle; }
+    .wg-table tbody tr:last-child td { border-bottom: none; }
+    .wg-table tbody tr:hover { background: #f9fafb; }
+    .wg-avatar { width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #2563eb; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .wg-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; display: inline-block; }
+    .wg-badge-green  { background: #f0fdf4; color: #15803d; }
+    .wg-badge-red    { background: #fef2f2; color: #b91c1c; }
+    .wg-badge-yellow { background: #fffbeb; color: #92400e; }
+    .wg-btn { font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: opacity 0.15s; }
+    .wg-btn:hover { opacity: 0.8; }
+    .wg-btn-green { background: #f0fdf4; color: #15803d; }
+    .wg-btn-red   { background: #fef2f2; color: #b91c1c; }
+    .wg-tabs { display: flex; gap: 6px; }
+    .wg-tab { font-size: 13px; font-weight: 500; padding: 6px 16px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; color: #6b7280; cursor: pointer; transition: all 0.15s; }
+    .wg-tab:hover { border-color: #93c5fd; color: #2563eb; }
+    .wg-tab.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .wg-alert { padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; }
+    .wg-alert-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .wg-alert-red   { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+</style>
+
+<script>
+    function filterTable(status, btn) {
+        document.querySelectorAll('.wg-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('#companyTable tbody tr').forEach(row => {
+            row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+        });
+    }
+</script>

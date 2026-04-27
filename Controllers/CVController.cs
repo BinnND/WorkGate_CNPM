@@ -47,7 +47,7 @@ namespace SourceCode.Controllers
                 string fileName = Guid.NewGuid().ToString() + Path.GetExtension(fileCV.FileName);
                 string uploadPath = Path.Combine(folderPath, fileName);
 
-                using (var stream = new FileStream(uploadPath, FileMode.Create)) // Dòng gây lỗi cũ
+                using (var stream = new FileStream(uploadPath, FileMode.Create)) 
                 {
                     await fileCV.CopyToAsync(stream);
                 }

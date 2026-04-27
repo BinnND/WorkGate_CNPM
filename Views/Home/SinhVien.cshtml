@@ -123,7 +123,7 @@
                     </div>
                 }
 
-                <form method="get" asp-controller="Job" asp-action="SinhVien" class="mb-5">
+                <form method="get" asp-controller="Home" asp-action="SinhVien" class="mb-5">
                     <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
                         <span class="input-group-text bg-white border-0 ps-4"><i class="fas fa-search text-muted"></i></span>
                         <input type="text" name="searchString" value="@ViewBag.SearchString" class="form-control border-0 py-3 shadow-none" placeholder="Tìm kiếm vị trí công việc, công ty, địa điểm...">
@@ -150,7 +150,7 @@
                                                 asp-action="EnterpriseDetails" 
                                                 asp-route-id="@job.FK_sMaDN" 
                                                 class="text-primary fw-bold text-decoration-none">
-                                                Xem chi tiết doanh nghiệp
+                                                Xem chi tiết
                                             </a>
                                         </div>
 

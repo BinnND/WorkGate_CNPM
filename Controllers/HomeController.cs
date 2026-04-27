@@ -18,15 +18,17 @@ namespace SourceCode.Controllers
         }
 
         [Authorize(Roles = "sinhvien")]
+        [Authorize(Roles = "sinhvien")]
         public async Task<IActionResult> SinhVien(string searchString)
         {
+            ViewBag.SearchString = searchString;
             var jobsQuery = _context.TinTuyenDungs.AsQueryable();
-            if (!string.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrWhiteSpace(searchString))
             {
-                jobsQuery = jobsQuery.Where(j => j.sViTriCV.Contains(searchString));
-                ViewBag.SearchString = searchString;
+                string keyword = searchString.Trim().ToLower();
+                jobsQuery = jobsQuery.Where(j => j.sViTriCV.ToLower().Contains(keyword)
+                                             || j.sDiaDiem.ToLower().Contains(keyword));
             }
-
             var jobsList = await jobsQuery.ToListAsync();
             return View(jobsList);
         }
