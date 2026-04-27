@@ -167,11 +167,9 @@ namespace SourceCode.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditJob(TinTuyenDung model)
         {
-            // Loại bỏ kiểm tra các trường không có trong form để tránh IsValid = false
             ModelState.Remove("FK_sMaDN");
             ModelState.Remove("sTrangThaiTin");
 
-            // Kiểm tra thời gian (MS_03)
             if (model.dHanNop < DateTime.Now)
             {
                 ModelState.AddModelError("dHanNop", "Hạn nộp hồ sơ không được nhỏ hơn ngày hiện tại.");
@@ -184,18 +182,15 @@ namespace SourceCode.Controllers
                     var jobInDb = await _context.TinTuyenDungs.FindAsync(model.PK_sMaTin);
                     if (jobInDb != null)
                     {
-                        // Cập nhật dữ liệu từ form
                         jobInDb.sViTriCV = model.sViTriCV;
                         jobInDb.tMoTaCV = model.tMoTaCV;
-                        jobInDb.sYeuCauChuyenMon = model.sYeuCauChuyenMon; // Cập nhật thêm trường này
+                        jobInDb.sYeuCauChuyenMon = model.sYeuCauChuyenMon; 
                         jobInDb.iSoLuong = model.iSoLuong;
                         jobInDb.fMucLuong = model.fMucLuong;
                         jobInDb.sDiaDiem = model.sDiaDiem;
                         jobInDb.dHanNop = model.dHanNop;
 
-                        // THIẾT LẬP TRẠNG THÁI VÀ NGÀY CẬP NHẬT
                         jobInDb.sTrangThaiTin = "Chờ duyệt";
-                        // jobInDb.dNgayCapNhat = DateTime.Now; // Nếu model của bạn có trường này
 
                         _context.Update(jobInDb);
                         await _context.SaveChangesAsync();

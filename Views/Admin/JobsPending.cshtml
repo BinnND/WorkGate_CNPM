@@ -77,11 +77,13 @@
                             <td class="small text-muted">@job.dNgayDang.ToString("dd/MM/yyyy")</td>
                             <td class="text-end">
                                 <div class="d-flex gap-2 justify-content-end">
-                                    <a asp-action="ApproveJob" asp-route-id="@job.PK_sMaTin"
-                                       class="wg-btn wg-btn-green"
-                                       onclick="return confirm('Duyệt tin: @job.sViTriCV?')">
-                                        <i class="bi bi-check-lg"></i> Duyệt
-                                    </a>
+                                    <form asp-action="ApproveJob" method="post" style="display:inline;"
+                                          onsubmit="return confirm('Duyệt tin: @job.sViTriCV?')">
+                                        <input type="hidden" name="id" value="@job.PK_sMaTin" />
+                                        <button type="submit" class="wg-btn wg-btn-green">
+                                            <i class="bi bi-check-lg"></i> Duyệt
+                                        </button>
+                                    </form>
                                     <button class="wg-btn wg-btn-red"
                                             onclick="openReject('@job.PK_sMaTin', '@job.sViTriCV')">
                                         <i class="bi bi-x-lg"></i> Từ chối

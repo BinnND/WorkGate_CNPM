@@ -129,36 +129,62 @@
             </div>
         }
         @foreach (var job in activeJobs)
-        {
-            <div class="dn-job-row">
-                <div class="dn-job-icon"><i class="fas fa-briefcase text-primary"></i></div>
-                <div class="flex-1">
-                    <div class="fw-semibold" style="font-size:14px;">@job.sViTriCV</div>
-                    <div style="font-size:12px;color:#6b7280;">
-                        <i class="fas fa-map-marker-alt me-1"></i>@job.sDiaDiem
-                        <span class="mx-2">·</span>
-                        <i class="fas fa-calendar me-1"></i>Hạn nộp: 
-                        <span class="@(job.dHanNop < DateTime.Now ? "text-danger" : "")">
-                            @job.dHanNop.ToString("dd/MM/yyyy")
-                        </span>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    @if (job.fMucLuong > 0)
-                    {
-                        <span style="font-size:13px;font-weight:600;color:#15803d;">@job.fMucLuong.ToString("N0") đ</span>
-                    }
-                    else
-                    {
-                        <span style="font-size:12px;color:#6b7280;">Thỏa thuận</span>
-                    }
-                    <form asp-controller="Job" asp-action="Apply" method="post">
-                        <input type="hidden" name="idTin" value="@job.PK_sMaTin" />
-                        <button type="submit" class="dn-apply-btn">Ứng tuyển</button>
-                    </form>
-                </div>
+{
+    <div class="dn-job-row">
+        <div class="dn-job-icon"><i class="fas fa-briefcase text-primary"></i></div>
+        <div class="flex-1" style="width:100%;">
+            <div class="fw-semibold" style="font-size:14px;">@job.sViTriCV</div>
+            <div style="font-size:12px;color:#6b7280;">
+                <i class="fas fa-map-marker-alt me-1"></i>@job.sDiaDiem
+                <span class="mx-2">·</span>
+                <i class="fas fa-calendar me-1"></i>Hạn nộp:
+                <span class="@(job.dHanNop < DateTime.Now ? "text-danger" : "")">
+                    @job.dHanNop.ToString("dd/MM/yyyy")
+                </span>
             </div>
-        }
+
+            {{! ✅ THÊM MỚI: Mô tả & Yêu cầu }}
+            @if (!string.IsNullOrEmpty(job.tMoTaCV) || !string.IsNullOrEmpty(job.sYeuCauChuyenMon))
+            {
+                <div style="margin-top:10px;display:flex;gap:24px;flex-wrap:wrap;">
+                    @if (!string.IsNullOrEmpty(job.tMoTaCV))
+                    {
+                        <div style="flex:1;min-width:200px;">
+                            <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">
+                                <i class="fas fa-align-left me-1"></i>Mô tả công việc
+                            </div>
+                            <div style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-line;">@job.tMoTaCV</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(job.sYeuCauChuyenMon))
+                    {
+                        <div style="flex:1;min-width:200px;">
+                            <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">
+                                <i class="fas fa-graduation-cap me-1"></i>Yêu cầu sinh viên
+                            </div>
+                            <div style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-line;">@job.sYeuCauChuyenMon</div>
+                        </div>
+                    }
+                </div>
+            }
+
+        </div>
+        <div class="d-flex align-items-start gap-2" style="flex-shrink:0;">
+            @if (job.fMucLuong > 0)
+            {
+                <span style="font-size:13px;font-weight:600;color:#15803d;">@job.fMucLuong.ToString("N0") đ</span>
+            }
+            else
+            {
+                <span style="font-size:12px;color:#6b7280;">Thỏa thuận</span>
+            }
+            <form asp-controller="Job" asp-action="Apply" method="post">
+                <input type="hidden" name="idTin" value="@job.PK_sMaTin" />
+                <button type="submit" class="dn-apply-btn">Ứng tuyển</button>
+            </form>
+        </div>
+    </div>
+}
     </div>
 
     <div class="d-flex gap-2">

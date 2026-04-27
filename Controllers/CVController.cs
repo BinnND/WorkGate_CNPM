@@ -61,6 +61,8 @@ namespace SourceCode.Controllers
             cv.PK_sMaHoSo = "CV" + Guid.NewGuid().ToString().Substring(0, 8);
             cv.FK_sMaSV = userId; 
             cv.dNgayTao = DateTime.Now;
+            cv.tThongTinKhac = string.IsNullOrEmpty(cv.tThongTinKhac) ? "" : cv.tThongTinKhac;
+            cv.tKinhNghiem = string.IsNullOrEmpty(cv.tKinhNghiem) ? "" : cv.tKinhNghiem;
 
             _context.HoSoSinhViens.Add(cv);
             await _context.SaveChangesAsync();
