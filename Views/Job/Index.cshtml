@@ -1,0 +1,188 @@
+@model IEnumerable<SourceCode.Models.TinTuyenDung>
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Quản lý tuyển dụng";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WorkGate</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #f3f4f6; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 100; }
+        .brand { font-weight: 700; font-size: 20px; color: #1e3a5f; text-decoration: none; }
+        .avatar { width: 32px; height: 32px; background: #dbeafe; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #1d4ed8; }
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+        .sidebar { width: 220px; background: #fff; border-right: 1px solid #e5e7eb; flex-shrink: 0; }
+        .sidebar-cta { display: flex; align-items: center; gap: 8px; padding: 14px 18px; background: #2563eb; color: #fff; font-weight: 600; font-size: 14px; text-decoration: none; }
+        .sidebar-cta:hover { background: #1d4ed8; color: #fff; }
+        .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 12px 18px; color: #4b5563; font-size: 14px; text-decoration: none; border-left: 3px solid transparent; }
+        .sidebar-link:hover { background: #f9fafb; color: #111827; }
+        .sidebar-link.active { border-left-color: #2563eb; background: #eff6ff; color: #2563eb; font-weight: 500; }
+        .content { flex: 1; padding: 24px 28px; }
+        .wg-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+        .wg-card-header { padding: 14px 18px; border-bottom: 1px solid #f3f4f6; font-size: 14px; font-weight: 600; color: #111827; display: flex; justify-content: space-between; align-items: center; }
+        table { width: 100%; font-size: 13px; border-collapse: collapse; }
+        thead th { background: #f9fafb; padding: 10px 16px; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.03em; border-bottom: 1px solid #e5e7eb; }
+        tbody td { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; color: #111827; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #fafafa; }
+        .badge-green  { background: #f0fdf4; color: #15803d; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; display:inline-block; }
+        .badge-red    { background: #fef2f2; color: #b91c1c; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; display:inline-block; }
+        .badge-yellow { background: #fffbeb; color: #92400e; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; display:inline-block; }
+        .badge-blue   { background: #eff6ff; color: #1d4ed8; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; display:inline-block; }
+        .btn-new { font-size: 13px; padding: 6px 16px; border-radius: 8px; background: #2563eb; color: #fff; border: none; cursor: pointer; text-decoration: none; display:inline-flex; align-items:center; gap:6px; }
+        .btn-new:hover { background: #1d4ed8; color: #fff; }
+        .search-input { height: 34px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0 12px; font-size: 13px; outline: none; width: 220px; }
+        .search-input:focus { border-color: #93c5fd; }
+        .tab-btn { font-size: 13px; padding: 5px 14px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; color: #6b7280; cursor: pointer; }
+        .tab-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+        .empty-row td { text-align: center; padding: 40px; color: #9ca3af; }
+        .page-title { font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a asp-controller="Home" asp-action="Enterprise" class="brand">WorkGate</a>
+    <div class="dropdown">
+        <div class="d-flex align-items-center gap-2" data-bs-toggle="dropdown" style="cursor:pointer">
+            <div class="avatar">@(User.Identity.Name?.Substring(0,1).ToUpper())</div>
+            <div>
+                <div style="font-size:13px;font-weight:600;color:#111827;">@User.Identity.Name</div>
+                <div style="font-size:11px;color:#6b7280;">Doanh nghiệp</div>
+            </div>
+            <i class="fas fa-chevron-down ms-1 text-muted" style="font-size:10px;"></i>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2">
+            <li><a class="dropdown-item py-2 rounded" asp-controller="Job" asp-action="Profile"><i class="fas fa-user-circle me-2 text-primary"></i>Thông tin cá nhân</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item py-2 rounded text-danger" asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="layout">
+    <div class="sidebar">
+        <a asp-controller="Job" asp-action="Create" class="sidebar-cta">
+            <i class="fas fa-plus"></i> Đăng tin tuyển dụng
+        </a>
+        <a asp-controller="Job" asp-action="Index" class="sidebar-link active">
+            <i class="fas fa-tasks"></i> Quản lý tuyển dụng
+        </a>
+        <a asp-controller="Home" asp-action="Applicants" class="sidebar-link">
+            <i class="fas fa-users"></i> Danh sách ứng viên
+        </a>
+    </div>
+
+    <div class="content">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="page-title">Quản lý tin tuyển dụng</div>
+            <a asp-controller="Job" asp-action="Create" class="btn-new">
+                <i class="fas fa-plus"></i> Đăng tin mới
+            </a>
+        </div>
+
+        <div class="wg-card">
+            <div class="wg-card-header">
+                <div class="d-flex gap-2">
+                    <button class="tab-btn active" onclick="filterJobs('all', this)">Tất cả (@Model.Count())</button>
+                    <button class="tab-btn" onclick="filterJobs('Đã duyệt', this)">Đã duyệt (@Model.Count(j => j.sTrangThaiTin == "Đã duyệt"))</button>
+                    <button class="tab-btn" onclick="filterJobs('Chờ duyệt', this)">Chờ duyệt (@Model.Count(j => j.sTrangThaiTin == "Chờ duyệt"))</button>
+                    <button class="tab-btn" onclick="filterJobs('Từ chối', this)">Từ chối (@Model.Count(j => j.sTrangThaiTin == "Từ chối"))</button>
+                </div>
+                <input type="text" class="search-input" placeholder="Tìm vị trí..." oninput="searchJobs(this.value)" />
+            </div>
+            <table id="jobTable">
+                <thead>
+                    <tr>
+                        <th>Vị trí công việc</th>
+                        <th>Địa điểm</th>
+                        <th>Mức lương</th>
+                        <th>Số lượng</th>
+                        <th>Hạn nộp</th>
+                        <th>Ngày đăng</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr class="empty-row">
+                            <td colspan="7">
+                                <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+                                Chưa có tin nào. <a asp-action="Create" style="color:#2563eb;">Đăng tin ngay</a>
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var tin in Model)
+                    {
+                        var statusClass = tin.sTrangThaiTin switch {
+                            "Đã duyệt"  => "badge-green",
+                            "Từ chối"   => "badge-red",
+                            _           => "badge-yellow"
+                        };
+                        <tr data-status="@tin.sTrangThaiTin">
+                            <td>
+                                <div class="fw-semibold">@tin.sViTriCV</div>
+                                @if (!string.IsNullOrEmpty(tin.tMoTaCV))
+                                {
+                                    <div style="font-size:11px;color:#9ca3af;max-width:200px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">@tin.tMoTaCV</div>
+                                }
+                            </td>
+                            <td class="text-muted">@tin.sDiaDiem</td>
+                            <td>
+                                @if (tin.fMucLuong > 0)
+                                {
+                                    <span class="fw-semibold" style="color:#15803d;">@tin.fMucLuong.ToString("N0") đ</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Thỏa thuận</span>
+                                }
+                            </td>
+                            <td class="text-center">@(tin.iSoLuong?.ToString() ?? "—")</td>
+                            <td class="@(tin.dHanNop < DateTime.Now ? "text-danger" : "text-muted")">
+                                @tin.dHanNop.ToString("dd/MM/yyyy")
+                            </td>
+                            <td class="text-muted">@tin.dNgayDang.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <span class="@statusClass">@tin.sTrangThaiTin</span>
+                                @if (!string.IsNullOrEmpty(tin.sGhiChuTuChoi) && tin.sTrangThaiTin == "Từ chối")
+                                {
+                                    <div style="font-size:11px;color:#b91c1c;margin-top:3px;">@tin.sGhiChuTuChoi</div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function filterJobs(status, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('#jobTable tbody tr').forEach(row => {
+            row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+        });
+    }
+
+    function searchJobs(q) {
+        q = q.toLowerCase();
+        document.querySelectorAll('#jobTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+</script>
+</body>
+</html>

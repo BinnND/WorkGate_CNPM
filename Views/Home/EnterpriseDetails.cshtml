@@ -1,81 +1,188 @@
-﻿@model SourceCode.Models.Doanhnghiep
-
+@model SourceCode.Models.Doanhnghiep
 @{
-    ViewData["Title"] = "Thông Tin Doanh Nghiệp";
-    // Nếu bạn muốn dùng layout chung của sinh viên, hãy bỏ dòng Layout = null bên dưới
-    Layout = "_Layout"; 
+    ViewData["Title"] = "Chi tiết doanh nghiệp";
+    Layout = "_Layout";
+    var activeJobs = ViewBag.ActiveJobs as IEnumerable<SourceCode.Models.TinTuyenDung> 
+                     ?? new List<SourceCode.Models.TinTuyenDung>();
+    int totalJobs = (int)(ViewBag.TotalJobs ?? 0);
 }
 
-<div class="container py-5">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-action="SinhVien">Tìm việc</a></li>
-            <li class="breadcrumb-item active">Chi tiết doanh nghiệp</li>
+<div class="container py-4" style="max-width:960px;">
+
+    @* Breadcrumb *@
+    <nav class="mb-3">
+        <ol class="breadcrumb" style="font-size:13px;">
+            <li class="breadcrumb-item"><a asp-action="SinhVien" style="color:#6b7280;text-decoration:none;">Tìm việc</a></li>
+            <li class="breadcrumb-item active" style="color:#2563eb;font-weight:500;">Chi tiết doanh nghiệp</li>
         </ol>
     </nav>
 
-    <div class="card shadow-sm border-0 rounded-lg">
-        <div class="card-header bg-white border-0 pt-4 px-4">
-            <div class="d-flex align-items-center">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
-                    <i class="fas fa-building fa-2x"></i>
-                </div>
-                <div>
-                    <h2 class="mb-0 fw-bold text-dark">@Model.sTenDN</h2>
-                    <span class="badge @(Model.sTrangThaiDuyet == "Đã duyệt" ? "bg-success" : "bg-warning")">
-                        <i class="fas fa-check-circle me-1"></i> @Model.sTrangThaiDuyet
+    @* Header card *@
+    <div class="dn-card mb-3">
+        <div class="d-flex align-items-center gap-4">
+            <div class="dn-logo">
+                <i class="fas fa-building fa-2x text-white"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="fw-bold mb-1" style="color:#111827;">@Model.sTenDN</h4>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    @if (Model.sTrangThaiDuyet == "Đã duyệt")
+                    {
+                        <span style="background:#f0fdf4;color:#15803d;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:500;">
+                            <i class="fas fa-check-circle me-1"></i> Đã xác minh
+                        </span>
+                    }
+                    <span style="background:#eff6ff;color:#1d4ed8;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:500;">
+                        <i class="fas fa-briefcase me-1"></i> @activeJobs.Count() tin đang tuyển
+                    </span>
+                    <span style="background:#f3f4f6;color:#6b7280;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:500;">
+                        <i class="fas fa-history me-1"></i> @totalJobs tổng tin đã đăng
                     </span>
                 </div>
             </div>
         </div>
-        
-        <div class="card-body p-4">
-            <div class="row">
-                <div class="col-md-7">
-                    <h5 class="fw-bold border-bottom pb-2 mb-3">Thông tin chung</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-3">
-                            <i class="fas fa-id-card me-2 text-primary"></i>
-                            <strong>Mã doanh nghiệp:</strong> @Model.PK_sMaDN
-                        </li>
-                        <li class="mb-3">
-                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
-                            <strong>Địa chỉ:</strong> @Model.sDiaChi
-                        </li>
-                        <li class="mb-3">
-                            <i class="fas fa-user-tie me-2 text-primary"></i>
-                            <strong>Người đại diện:</strong> @Model.sNguoiDaiDien
-                        </li>
-                        <li class="mb-3">
-                            <i class="fas fa-file-invoice me-2 text-primary"></i>
-                            <strong>Mã số thuế:</strong> @Model.FK_sMaSoThue
-                        </li>
-                    </ul>
+    </div>
+
+    <div class="row g-3 mb-3">
+        @* Thông tin chung *@
+        <div class="col-md-7">
+            <div class="dn-card h-100">
+                <div class="dn-section-title">
+                    <i class="fas fa-info-circle me-2 text-primary"></i>Thông tin doanh nghiệp
                 </div>
-                
-                <div class="col-md-5 bg-light rounded p-4">
-                    <h5 class="fw-bold mb-3">Pháp lý & Hoạt động</h5>
-                    <p><strong>Giấy phép KD:</strong> @Model.sGiayPhepKD</p>
-                    <p><strong>Ngày kích hoạt:</strong> @(Model.dNgayKichHoat?.ToString("dd/MM/yyyy") ?? "Đang cập nhật")</p>
-                    <div class="alert alert-info border-0 small">
-                        <i class="fas fa-info-circle me-1"></i> Doanh nghiệp này đã cam kết tuân thủ các quy định tuyển dụng của WorkGate.
-                    </div>
+                <div class="dn-info-row">
+                    <span class="dn-info-label"><i class="fas fa-map-marker-alt me-2 text-primary"></i>Địa chỉ</span>
+                    <span class="dn-info-val">@(string.IsNullOrEmpty(Model.sDiaChi) ? "Chưa cập nhật" : Model.sDiaChi)</span>
+                </div>
+                <div class="dn-info-row">
+                    <span class="dn-info-label"><i class="fas fa-user-tie me-2 text-primary"></i>Người đại diện</span>
+                    <span class="dn-info-val">@(string.IsNullOrEmpty(Model.sNguoiDaiDien) ? "Chưa cập nhật" : Model.sNguoiDaiDien)</span>
+                </div>
+                <div class="dn-info-row">
+                    <span class="dn-info-label"><i class="fas fa-file-invoice me-2 text-primary"></i>Mã số thuế</span>
+                    <span class="dn-info-val">@(string.IsNullOrEmpty(Model.FK_sMaSoThue) ? "Chưa cập nhật" : Model.FK_sMaSoThue)</span>
+                </div>
+                <div class="dn-info-row">
+                    <span class="dn-info-label"><i class="fas fa-certificate me-2 text-primary"></i>Giấy phép KD</span>
+                    <span class="dn-info-val">@(string.IsNullOrEmpty(Model.sGiayPhepKD) ? "Chưa cập nhật" : Model.sGiayPhepKD)</span>
+                </div>
+                <div class="dn-info-row" style="border:none;">
+                    <span class="dn-info-label"><i class="fas fa-calendar-check me-2 text-primary"></i>Ngày kích hoạt</span>
+                    <span class="dn-info-val">@(Model.dNgayKichHoat?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</span>
                 </div>
             </div>
+        </div>
 
-            <div class="mt-4 pt-3 border-top d-flex gap-2">
-                <a asp-action="SinhVien" class="btn btn-outline-secondary px-4">
-                    <i class="fas fa-arrow-left me-2"></i>Quay lại
-                </a>
-                <button class="btn btn-primary px-4">Theo dõi doanh nghiệp</button>
+        @* Uy tín *@
+        <div class="col-md-5">
+            <div class="dn-card h-100">
+                <div class="dn-section-title">
+                    <i class="fas fa-shield-alt me-2 text-primary"></i>Độ uy tín
+                </div>
+                <div class="dn-trust-item">
+                    <div class="dn-trust-icon green"><i class="fas fa-check"></i></div>
+                    <div>
+                        <div style="font-size:13px;font-weight:500;">Đã xác minh pháp lý</div>
+                        <div style="font-size:11px;color:#6b7280;">Giấy phép kinh doanh hợp lệ</div>
+                    </div>
+                </div>
+                <div class="dn-trust-item">
+                    <div class="dn-trust-icon blue"><i class="fas fa-briefcase"></i></div>
+                    <div>
+                        <div style="font-size:13px;font-weight:500;">@totalJobs tin tuyển dụng</div>
+                        <div style="font-size:11px;color:#6b7280;">Tổng số tin đã đăng trên WorkGate</div>
+                    </div>
+                </div>
+                <div class="dn-trust-item">
+                    <div class="dn-trust-icon green"><i class="fas fa-user-check"></i></div>
+                    <div>
+                        <div style="font-size:13px;font-weight:500;">Cam kết tuyển dụng</div>
+                        <div style="font-size:11px;color:#6b7280;">Tuân thủ quy định của WorkGate</div>
+                    </div>
+                </div>
+                @if (Model.sTrangThaiDuyet == "Đã duyệt")
+                {
+                    <div class="dn-trust-item" style="border:none;">
+                        <div class="dn-trust-icon green"><i class="fas fa-star"></i></div>
+                        <div>
+                            <div style="font-size:13px;font-weight:500;">Tài khoản chính thức</div>
+                            <div style="font-size:11px;color:#6b7280;">Được WorkGate xác nhận</div>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
+
+    @* Tin đang tuyển *@
+    <div class="dn-card mb-4">
+        <div class="dn-section-title d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-list me-2 text-primary"></i>Tin tuyển dụng đang mở</span>
+            <span style="font-size:12px;color:#6b7280;">@activeJobs.Count() vị trí</span>
+        </div>
+
+        @if (!activeJobs.Any())
+        {
+            <div class="text-center py-4 text-muted" style="font-size:13px;">
+                <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+                Doanh nghiệp chưa có tin tuyển dụng nào
+            </div>
+        }
+        @foreach (var job in activeJobs)
+        {
+            <div class="dn-job-row">
+                <div class="dn-job-icon"><i class="fas fa-briefcase text-primary"></i></div>
+                <div class="flex-1">
+                    <div class="fw-semibold" style="font-size:14px;">@job.sViTriCV</div>
+                    <div style="font-size:12px;color:#6b7280;">
+                        <i class="fas fa-map-marker-alt me-1"></i>@job.sDiaDiem
+                        <span class="mx-2">·</span>
+                        <i class="fas fa-calendar me-1"></i>Hạn nộp: 
+                        <span class="@(job.dHanNop < DateTime.Now ? "text-danger" : "")">
+                            @job.dHanNop.ToString("dd/MM/yyyy")
+                        </span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    @if (job.fMucLuong > 0)
+                    {
+                        <span style="font-size:13px;font-weight:600;color:#15803d;">@job.fMucLuong.ToString("N0") đ</span>
+                    }
+                    else
+                    {
+                        <span style="font-size:12px;color:#6b7280;">Thỏa thuận</span>
+                    }
+                    <form asp-controller="Job" asp-action="Apply" method="post">
+                        <input type="hidden" name="idTin" value="@job.PK_sMaTin" />
+                        <button type="submit" class="dn-apply-btn">Ứng tuyển</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-action="SinhVien" class="btn btn-outline-secondary px-4">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
+    </div>
 </div>
 
-@section Styles {
-    <style>
-        .breadcrumb-item a { text-decoration: none; color: #6c757d; }
-        .breadcrumb-item.active { color: #3182ce; font-weight: 600; }
-    </style>
-}
+<style>
+    .dn-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; }
+    .dn-logo { width: 64px; height: 64px; background: #2563eb; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .dn-section-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 16px; }
+    .dn-info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+    .dn-info-label { color: #6b7280; display: flex; align-items: center; }
+    .dn-info-val { font-weight: 500; color: #111827; text-align: right; max-width: 60%; }
+    .dn-trust-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+    .dn-trust-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .dn-trust-icon.green { background: #f0fdf4; color: #15803d; }
+    .dn-trust-icon.blue  { background: #eff6ff; color: #2563eb; }
+    .dn-job-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+    .dn-job-row:last-child { border-bottom: none; }
+    .dn-job-icon { width: 38px; height: 38px; background: #eff6ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .dn-apply-btn { font-size: 13px; font-weight: 500; padding: 6px 16px; border-radius: 8px; background: #2563eb; color: #fff; border: none; cursor: pointer; white-space: nowrap; }
+    .dn-apply-btn:hover { background: #1d4ed8; }
+    .breadcrumb-item a:hover { color: #2563eb; }
+</style>

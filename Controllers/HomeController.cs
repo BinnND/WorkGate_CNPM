@@ -38,12 +38,17 @@ namespace SourceCode.Controllers
             var enterprise = await _context.Doanhnghieps
                 .FirstOrDefaultAsync(m => m.PK_sMaDN == id || m.FK_sUserID == id);
 
-            if (enterprise == null)
-            {
-                return NotFound();
-            }
+            if (enterprise == null) return NotFound();
 
-            return View(enterprise); 
+            ViewBag.ActiveJobs = await _context.TinTuyenDungs
+                .Where(t => t.FK_sMaDN == enterprise.PK_sMaDN && t.sTrangThaiTin == "Đã duyệt")
+                .OrderByDescending(t => t.dNgayDang)
+                .ToListAsync();
+
+            ViewBag.TotalJobs = await _context.TinTuyenDungs
+                .CountAsync(t => t.FK_sMaDN == enterprise.PK_sMaDN);
+
+            return View(enterprise);
         }
         public async Task<IActionResult> Enterprise()
         {
@@ -51,24 +56,51 @@ namespace SourceCode.Controllers
             var dn = await _context.Doanhnghieps.FirstOrDefaultAsync(d => d.FK_sUserID == userId);
             if (dn == null) return RedirectToAction("Login", "Account");
 
-            // Danh sách tin của doanh nghiệp
-            var tins = await _context.TinTuyenDungs
+            var maTins = await _context.TinTuyenDungs
                 .Where(t => t.FK_sMaDN == dn.PK_sMaDN)
-                .OrderByDescending(t => t.dNgayDang)
+                .Select(t => t.PK_sMaTin).ToListAsync();
+
+            ViewBag.TotalJobs = maTins.Count;
+            ViewBag.TotalApps = await _context.UngTuyens.CountAsync(u => maTins.Contains(u.FK_sMaTin));
+            ViewBag.PendingApps = await _context.UngTuyens.CountAsync(u => maTins.Contains(u.FK_sMaTin) && u.sTrangThaiUngTuyen == "Pending");
+
+            return View();
+        }
+        public async Task<IActionResult> Applicants()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var dn = await _context.Doanhnghieps.FirstOrDefaultAsync(d => d.FK_sUserID == userId);
+            if (dn == null) return RedirectToAction("Login", "Account");
+
+            var maTins = await _context.TinTuyenDungs
+                .Where(t => t.FK_sMaDN == dn.PK_sMaDN)
+                .Select(t => t.PK_sMaTin)
                 .ToListAsync();
 
-            // Danh sách ứng viên cho các tin đó
-            var maTins = tins.Select(t => t.PK_sMaTin).ToList();
             var ungTuyens = await _context.UngTuyens
                 .Include(u => u.TinTuyenDung)
                 .Include(u => u.HoSoSinhVien)
                 .Where(u => maTins.Contains(u.FK_sMaTin))
+                .OrderByDescending(u => u.dNgayUngTuyen)
                 .ToListAsync();
 
-            ViewBag.TinTuyenDungs = tins;
-            ViewBag.UngTuyens = ungTuyens;
-            ViewBag.TenDN = dn.sTenDN;
-            return View();
+            return View(ungTuyens);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApproveApplicant(string id)
+        {
+            var app = await _context.UngTuyens.FindAsync(id);
+            if (app != null) { app.sTrangThaiUngTuyen = "Approved"; await _context.SaveChangesAsync(); }
+            return RedirectToAction("Applicants");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RejectApplicant(string id)
+        {
+            var app = await _context.UngTuyens.FindAsync(id);
+            if (app != null) { app.sTrangThaiUngTuyen = "Rejected"; await _context.SaveChangesAsync(); }
+            return RedirectToAction("Applicants");
         }
     }
 }

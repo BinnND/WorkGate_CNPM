@@ -16,14 +16,14 @@ namespace SourceCode.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+       /* public IActionResult Index()
         {
             var jobs = _context.TinTuyenDungs
                 .Where(j => j.sTrangThaiTin == "Approved")
                 .ToList();
 
             return View(jobs);
-        }
+        }*/
 
         public IActionResult Create() => View();
 
@@ -31,13 +31,16 @@ namespace SourceCode.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TinTuyenDung job)
         {
-            var businessId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(businessId)) return RedirectToAction("Login", "Account");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
+
+            var dn = await _context.Doanhnghieps.FirstOrDefaultAsync(d => d.FK_sUserID == userId);
+            if (dn == null) return RedirectToAction("Login", "Account");
+
             job.PK_sMaTin = "TT" + DateTime.Now.Ticks.ToString().Substring(10);
-            job.FK_sMaDN = businessId;
+            job.FK_sMaDN = dn.PK_sMaDN; 
             job.dNgayDang = DateTime.Now;
             job.sTrangThaiTin = "Chờ duyệt";
-
             if (string.IsNullOrEmpty(job.sDiaDiem)) job.sDiaDiem = "Toàn quốc";
             if (string.IsNullOrEmpty(job.sYeuCauChuyenMon)) job.sYeuCauChuyenMon = "Trao đổi khi phỏng vấn";
             job.sGhiChuTuChoi = "";
@@ -47,7 +50,7 @@ namespace SourceCode.Controllers
                 _context.TinTuyenDungs.Add(job);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Đăng tin tuyển dụng thành công!";
-                return RedirectToAction("Enterprise", "Home");
+                return RedirectToAction("Index"); 
             }
             catch (Exception ex)
             {
@@ -106,7 +109,7 @@ namespace SourceCode.Controllers
         public IActionResult SinhVien()
         {
             var jobs = _context.TinTuyenDungs
-                .Where(j => j.sTrangThaiTin == "Approved")
+                .Where(j => j.sTrangThaiTin == "Đã duyệt")
                 .OrderByDescending(j => j.dNgayDang)
                 .ToList();
             return View("~/Views/Home/SinhVien.cshtml", jobs);
@@ -140,7 +143,19 @@ namespace SourceCode.Controllers
             }
             return View("~/Views/Account/Profile.cshtml", user);
         }
-       
+        public async Task<IActionResult> Index()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var dn = await _context.Doanhnghieps.FirstOrDefaultAsync(d => d.FK_sUserID == userId);
+            if (dn == null) return RedirectToAction("Login", "Account");
+
+            var jobs = await _context.TinTuyenDungs
+                .Where(j => j.FK_sMaDN == dn.PK_sMaDN)
+                .OrderByDescending(j => j.dNgayDang)
+                .ToListAsync();
+
+            return View(jobs);
+        }
     }
 
 }
